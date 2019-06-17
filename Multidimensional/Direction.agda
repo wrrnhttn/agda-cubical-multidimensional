@@ -23,6 +23,9 @@ caseDir ad au ↑ = au
 ¬↓≡↑ : ¬ ↓ ≡ ↑
 ¬↓≡↑ eq = subst (caseDir Dir ⊥) eq ↓
 
+¬↑≡↓ : ¬ ↑ ≡ ↓
+¬↑≡↓ eq = subst (caseDir ⊥ Dir) eq ↓
+
 -- Dependent "directional numerals":
 -- for natural n, obtain 2ⁿ "numerals".
 -- This is basically a little-endian binary notation.
@@ -40,6 +43,8 @@ DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
 ¬↓,d≡↑,d′ : ∀ {n} → ∀ (d d′ : DirNum n) → ¬ (↓ , d) ≡ (↑ , d′)
 ¬↓,d≡↑,d′ {n} d d′ ↓,d≡↑,d′ = ¬↓≡↑ (cong proj₁ ↓,d≡↑,d′)
 
+¬↑,d≡↓,d′ : ∀ {n} → ∀ (d d′ : DirNum n) → ¬ (↑ , d) ≡ (↓ , d′)
+¬↑,d≡↓,d′ {n} d d′ ↑,d≡↓,d′ = ¬↑≡↓ (cong proj₁ ↑,d≡↓,d′)
 
 -- dropping least significant bit preserves equality
 dropLeast≡ : ∀ {n} → ∀ (ds ds′ : DirNum n) (d : Dir)
@@ -56,6 +61,14 @@ next {suc n} (↑ , ds) = (↓ , next ds)
 zero-n : (n : ℕ) → DirNum n
 zero-n zero = tt
 zero-n (suc n) = (↓ , zero-n n)
+
+zero-n? : ∀ {n} → (x : DirNum n) → Dec (x ≡ zero-n n)
+zero-n? {zero} tt = yes refl
+zero-n? {suc n} (↓ , ds) with zero-n? ds
+... | no ds≠zero-n = no (λ y →
+                            ds≠zero-n (dropLeast≡ ds (zero-n n) ↓ y))
+... | yes ds≡zero-n = yes (cong (λ y → (↓ , y)) ds≡zero-n)
+zero-n? {suc n} (↑ , ds) = no ((¬↑,d≡↓,d′ ds (zero-n n)))
 
 zero-n≡0 : {r : ℕ} → DirNum→ℕ (zero-n r) ≡ zero
 zero-n≡0{zero} = refl
