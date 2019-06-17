@@ -76,8 +76,8 @@ max? {suc n} (↑ , ds) with max? ds
           (↑ , max-n n)
         ∎
       )
-... | no ¬ds≡max-n = no (λ d∷ds≡d∷max-n →
-                            ¬ds≡max-n ((dropLeast≡ ds (max-n n) ↑ d∷ds≡d∷max-n)))
+... | no ¬ds≡max-n = no (λ d,ds≡d,max-n →
+                            ¬ds≡max-n ((dropLeast≡ ds (max-n n) ↑ d,ds≡d,max-n)))
 
 maxn+1≡↑maxn : ∀ n → max-n (suc n) ≡ (↑ , (max-n n))
 maxn+1≡↑maxn n = refl
