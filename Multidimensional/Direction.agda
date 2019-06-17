@@ -46,6 +46,13 @@ dropLeast≡ : ∀ {n} → ∀ (ds ds′ : DirNum n) (d : Dir)
          → ((d , ds) ≡ (d , ds′)) → ds ≡ ds′
 dropLeast≡ {n} ds ds′ d d,ds≡d,ds′ = cong proj₂ d,ds≡d,ds′
 
+-- give the next numeral, cycling back to 0
+-- in case of 2ⁿ - 1
+next : ∀ {n} → DirNum n → DirNum n
+next {zero} tt = tt
+next {suc n} (↓ , ds) = (↑ , ds)
+next {suc n} (↑ , ds) = (↓ , next ds)
+
 zero-n : (n : ℕ) → DirNum n
 zero-n zero = tt
 zero-n (suc n) = (↓ , zero-n n)
