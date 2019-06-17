@@ -30,3 +30,11 @@ NPos→ℕ zero (x⇀ tt x) = suc (NPos→ℕ zero x)
 NPos→ℕ (suc r) npos1 = suc zero
 NPos→ℕ (suc r) (x⇀ d x) = 
   sucn (DirNum→ℕ d) (doublesℕ (suc r) (NPos→ℕ (suc r) x))
+
+ℕ→NPos : ∀ r → ℕ → NPos r
+ℕ→NPos r zero = npos1
+ℕ→NPos zero (suc zero) = npos1
+ℕ→NPos zero (suc (suc n)) = sucNPos (ℕ→NPos zero (suc n))
+ℕ→NPos (suc r) (suc zero) = npos1
+ℕ→NPos (suc r) (suc (suc n)) = sucNPos (ℕ→NPos (suc r) (suc n))
+
