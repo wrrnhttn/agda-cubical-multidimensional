@@ -43,7 +43,7 @@ DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
 
 -- dropping least significant bit preserves equality
 dropLeast≡ : ∀ {n} → ∀ (ds ds′ : DirNum n) (d : Dir)
-         → ((d , ds) ≡ (d , ds′)) → ds ≡ ds′
+              → ((d , ds) ≡ (d , ds′)) → ds ≡ ds′
 dropLeast≡ {n} ds ds′ d d,ds≡d,ds′ = cong proj₂ d,ds≡d,ds′
 
 -- give the next numeral, cycling back to 0
