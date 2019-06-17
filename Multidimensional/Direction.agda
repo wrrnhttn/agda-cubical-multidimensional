@@ -57,6 +57,14 @@ zero-n : (n : ℕ) → DirNum n
 zero-n zero = tt
 zero-n (suc n) = (↓ , zero-n n)
 
+zero-n≡0 : {r : ℕ} → DirNum→ℕ (zero-n r) ≡ zero
+zero-n≡0{zero} = refl
+zero-n≡0 {suc r} = 
+    doubleℕ (DirNum→ℕ {r} (zero-n r))
+  ≡⟨ cong doubleℕ (zero-n≡0 {r}) ⟩ 
+   0
+  ∎
+
 one-n : (n : ℕ) → DirNum n
 one-n zero = tt
 one-n (suc n) = (↑ , zero-n n)
