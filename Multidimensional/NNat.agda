@@ -148,7 +148,13 @@ N→ℕ→N r x = {!!}
 
 ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n
 ℕ→N→ℕ zero zero = refl
-ℕ→N→ℕ (suc r) zero = {!!}
+ℕ→N→ℕ (suc r) zero = 
+    doubleℕ (DirNum→ℕ (zero-n r))
+  ≡⟨ cong doubleℕ (zero-n≡0 {r}) ⟩ 
+    doubleℕ zero
+  ≡⟨ refl ⟩ 
+    zero
+  ∎
 ℕ→N→ℕ zero (suc n) = cong suc (ℕ→N→ℕ zero n)
 ℕ→N→ℕ (suc r) (suc n) = 
     N→ℕ (suc r) (sucN (ℕ→N (suc r) n))
