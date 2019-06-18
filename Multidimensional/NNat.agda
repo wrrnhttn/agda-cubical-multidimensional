@@ -118,14 +118,15 @@ sucN {suc n} (xr d x) with max? d
 
 N→ℕ : (r : ℕ) (x : N r) → ℕ
 N→ℕ zero (bn tt) = zero
-N→ℕ zero (xr tt x) = {!!}
-N→ℕ (suc r) x = {!!}
+N→ℕ zero (xr tt x) = suc (N→ℕ zero x)
+N→ℕ (suc r) (bn x) = DirNum→ℕ x
+N→ℕ (suc r) (xr d x) = sucn (DirNum→ℕ d) (doublesℕ (suc r) (N→ℕ (suc r) x))
 
 
 ℕ→N : (r : ℕ) → (n : ℕ) → N r
 ℕ→N r zero = bn (zero-n r)
-ℕ→N zero (suc n) = {!!}
-ℕ→N (suc r) (suc n) = {!!}
+ℕ→N zero (suc n) = xr tt (ℕ→N zero n)
+ℕ→N (suc r) (suc n) = sucN (ℕ→N (suc r) n)
 
 
 
