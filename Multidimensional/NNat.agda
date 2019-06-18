@@ -122,11 +122,36 @@ N→ℕ zero (xr tt x) = suc (N→ℕ zero x)
 N→ℕ (suc r) (bn x) = DirNum→ℕ x
 N→ℕ (suc r) (xr d x) = sucn (DirNum→ℕ d) (doublesℕ (suc r) (N→ℕ (suc r) x))
 
+N→ℕsucN : (r : ℕ) (x : N r) → N→ℕ r (sucN x) ≡ suc (N→ℕ r x)
+N→ℕsucN zero (bn tt) = refl
+N→ℕsucN zero (xr tt x) = 
+    suc (N→ℕ zero (sucN x))
+  ≡⟨ cong suc (N→ℕsucN zero x) ⟩ 
+    suc (suc (N→ℕ zero x))
+  ∎
+N→ℕsucN (suc r) (bn (↓ , x)) = refl
+N→ℕsucN (suc r) (bn (↑ , x)) with max? x
+... | no _ = {!!}
+... | yes _ = {!!}
+N→ℕsucN (suc r) (xr x x₁) = {!!}
+
 
 ℕ→N : (r : ℕ) → (n : ℕ) → N r
 ℕ→N r zero = bn (zero-n r)
 ℕ→N zero (suc n) = xr tt (ℕ→N zero n)
 ℕ→N (suc r) (suc n) = sucN (ℕ→N (suc r) n)
+
+N→ℕ→N : (r : ℕ) → (x : N r) → ℕ→N r (N→ℕ r x) ≡ x
+N→ℕ→N r x = {!!}
+
+ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n
+ℕ→N→ℕ r n = {!!}
+
+N≃ℕ : (r : ℕ) → N r ≃ ℕ
+N≃ℕ r = isoToEquiv (iso (N→ℕ r) (ℕ→N r) (ℕ→N→ℕ r) (N→ℕ→N r))
+
+N≡ℕ : (r : ℕ) → N r ≡ ℕ
+N≡ℕ r = ua (N≃ℕ r)
 
 
 
