@@ -1,9 +1,14 @@
 {-# OPTIONS --cubical #-}
 
+open import Cubical.Core.Glue
 open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Equiv
+open import Cubical.Foundations.Univalence
+open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat
 open import Cubical.Data.Unit
 open import Cubical.Data.Prod
+open import Cubical.Data.BinNat
 open import Cubical.Relation.Nullary
 open import Direction
 
@@ -11,29 +16,137 @@ module NNat where
 -- much of this is based directly on the
 -- BinNat module in the Cubical Agda library
 
+data BNat : Type₀ where
+  b0 : BNat
+  b1 : BNat
+  x0 : BNat → BNat
+  x1 : BNat → BNat
+
+sucBNat : BNat → BNat
+sucBNat b0 = b1
+sucBNat b1 = x0 b1
+sucBNat (x0 bs) = x1 bs
+sucBNat (x1 bs) = x0 (sucBNat bs)
+
+BNat→ℕ : BNat → ℕ
+BNat→ℕ b0 = 0
+BNat→ℕ b1 = 1
+BNat→ℕ (x0 x) = doubleℕ (BNat→ℕ x)
+BNat→ℕ (x1 x) = suc (doubleℕ (BNat→ℕ x))
+
+-- BNat→Binℕ : BNat → Binℕ
+-- BNat→Binℕ pos0 = binℕ0
+-- BNat→Binℕ pos1 = binℕpos pos1
+-- BNat→Binℕ (x0 x) = {!binℕpos (x0 binℕpos (BNat→Binℕ x))!}
+-- BNat→Binℕ (x1 x) = {!!}
+
+BNat→ℕsucBNat : (b : BNat) → BNat→ℕ (sucBNat b) ≡ suc (BNat→ℕ b)
+BNat→ℕsucBNat b0 = refl
+BNat→ℕsucBNat b1 = refl
+BNat→ℕsucBNat (x0 b) = refl
+BNat→ℕsucBNat (x1 b) = λ i → doubleℕ (BNat→ℕsucBNat b i)
+
+ℕ→BNat : ℕ → BNat
+ℕ→BNat zero = b0
+ℕ→BNat (suc zero) = b1
+ℕ→BNat (suc (suc n)) = sucBNat (ℕ→BNat (suc n))
+
+ℕ→BNatSuc : ∀ n → ℕ→BNat (suc n) ≡ sucBNat (ℕ→BNat n)
+ℕ→BNatSuc zero = refl
+ℕ→BNatSuc (suc n) = refl
+
+bNatInd : {P : BNat → Type₀} → P b0 → ((b : BNat) → P b → P (sucBNat b)) → (b : BNat) → P b
+-- prove later...
+
+BNat→ℕ→BNat : (b : BNat) → ℕ→BNat (BNat→ℕ b) ≡ b
+BNat→ℕ→BNat b = bNatInd refl hs b
+  where
+  hs : (b : BNat) → ℕ→BNat (BNat→ℕ b) ≡ b → ℕ→BNat (BNat→ℕ (sucBNat b)) ≡ sucBNat b
+  hs b hb = 
+      ℕ→BNat (BNat→ℕ (sucBNat b))
+    ≡⟨ cong ℕ→BNat (BNat→ℕsucBNat b) ⟩ 
+      ℕ→BNat (suc (BNat→ℕ b))
+    ≡⟨ ℕ→BNatSuc (BNat→ℕ b) ⟩ 
+      sucBNat (ℕ→BNat (BNat→ℕ b))
+    ≡⟨ cong sucBNat hb ⟩ 
+      sucBNat b
+    ∎
+
+ℕ→BNat→ℕ : (n : ℕ) → BNat→ℕ (ℕ→BNat n) ≡ n
+ℕ→BNat→ℕ zero = refl
+ℕ→BNat→ℕ (suc n) = 
+    BNat→ℕ (ℕ→BNat (suc n))
+  ≡⟨ cong BNat→ℕ (ℕ→BNatSuc n) ⟩ 
+    BNat→ℕ (sucBNat (ℕ→BNat n))
+  ≡⟨ BNat→ℕsucBNat (ℕ→BNat n) ⟩ 
+    suc (BNat→ℕ (ℕ→BNat n))
+  ≡⟨ cong suc (ℕ→BNat→ℕ n) ⟩ 
+    suc n
+  ∎
+
+BNat≃ℕ : BNat ≃ ℕ
+BNat≃ℕ = isoToEquiv (iso BNat→ℕ ℕ→BNat ℕ→BNat→ℕ BNat→ℕ→BNat)
+
+BNat≡ℕ : BNat ≡ ℕ
+BNat≡ℕ = ua BNat≃ℕ
+
+
+-------
+
 sucn : (n : ℕ) → (ℕ → ℕ)
 sucn n = iter n suc
+
+data NPos' (n : ℕ) : Type₀ where
+  nposn : DirNum n → NPos' n
+  xr : DirNum n → NPos' n → NPos' n
+  
+-- we have 2ⁿ constructors, analogues to Pos with 2¹
+sucNPos' : ∀ {n} → NPos' n → NPos' n
+sucNPos' {zero} (nposn tt) = xr tt (nposn tt)
+sucNPos' {zero} (xr tt x) = xr tt (sucNPos' x)
+sucNPos' {suc n} (nposn (↓ , x)) = (nposn (↑ , x))
+sucNPos' {suc n} (nposn (↑ , x)) with max? x
+... | no _ = (nposn (↓ , next x))
+... | yes _ = {!!}
+sucNPos' {suc n} (xr x x₁) = {!!}
 
 data NPos (n : ℕ) : Type₀ where
   npos1 : NPos n
   x⇀ : DirNum n → NPos n → NPos n
   
 sucNPos : ∀ {n} → NPos n → NPos n
-sucNPos {zero} npos1      = x⇀ (zero-n zero) npos1
+sucNPos {zero} npos1      = x⇀ tt npos1
 sucNPos {zero} (x⇀ tt x) = x⇀ tt (sucNPos x)
-sucNPos {suc n} npos1     = x⇀ (zero-n (suc n)) npos1
+sucNPos {suc n} npos1     = x⇀ (next (one-n (suc n))) npos1
 sucNPos {suc n} (x⇀ d x) with (max? d)
 ...            | (no _)  = x⇀ (next d) x
 ...            | (yes _) = x⇀ (zero-n (suc n)) (sucNPos x)
 
-sucnpos1≡x⇀zero-n : ∀ {r} → sucNPos npos1 ≡ x⇀ (zero-n r) npos1
-sucnpos1≡x⇀zero-n {zero} = refl
-sucnpos1≡x⇀zero-n {suc r} = refl
+-- some examples for sanity check
 
-sucnposx⇀zero-n≡x⇀one-n : ∀ {r} {p} → sucNPos (x⇀ (zero-n r) p) ≡ x⇀ (one-n r) p
-sucnposx⇀zero-n≡x⇀one-n {zero} {npos1} = {!!}
-sucnposx⇀zero-n≡x⇀one-n {zero} {x⇀ x p} = {!!}
-sucnposx⇀zero-n≡x⇀one-n {suc r} {p} = refl
+2₂ : NPos 1
+2₂ = x⇀ (↓ , tt) npos1
+
+3₂ : NPos 1
+3₂ = x⇀ (↑ , tt) npos1
+
+4₂ : NPos 1
+4₂ = x⇀ (↓ , tt) (x⇀ (↓ , tt) npos1)
+
+2₄ : NPos 2
+2₄ = x⇀ (↓ , (↑ , tt)) npos1 -- how does this make sense?
+
+3₄ : NPos 2
+3₄ = x⇀ (↑ , (↑ , tt)) npos1 -- how does this make sense?
+
+-- sucnpos1≡x⇀one-n : ∀ {r} → sucNPos npos1 ≡ x⇀ (one-n r) npos1
+-- sucnpos1≡x⇀one-n {zero} = refl
+-- sucnpos1≡x⇀one-n {suc r} = {!!}
+
+-- sucnposx⇀zero-n≡x⇀one-n : ∀ {r} {p} → sucNPos (x⇀ (zero-n r) p) ≡ x⇀ (one-n r) p
+-- sucnposx⇀zero-n≡x⇀one-n {zero} {npos1} = {!!}
+-- sucnposx⇀zero-n≡x⇀one-n {zero} {x⇀ x p} = {!!}
+-- sucnposx⇀zero-n≡x⇀one-n {suc r} {p} = refl
 
 nPosInd : ∀ {r} {P : NPos r → Type₀} →
             P npos1 →
@@ -72,16 +185,34 @@ NPos→ℕ : ∀ r → NPos r → ℕ
 NPos→ℕ zero npos1 = suc zero
 NPos→ℕ zero (x⇀ tt x) = suc (NPos→ℕ zero x)
 NPos→ℕ (suc r) npos1 = suc zero
-NPos→ℕ (suc r) (x⇀ d x) = 
-  sucn (DirNum→ℕ d) (doublesℕ (suc r) (NPos→ℕ (suc r) x))
+NPos→ℕ (suc r) (x⇀ d x) with max? d
+... | no _ = sucn (DirNum→ℕ (next d)) (doublesℕ (suc r) (NPos→ℕ (suc r) x))
+... | yes _ = sucn (DirNum→ℕ (next d)) (doublesℕ (suc r) (suc (NPos→ℕ (suc r) x)))
+-- NPos→ℕ (suc r) (x⇀ d x) = 
+--   sucn (DirNum→ℕ d) (doublesℕ (suc r) (NPos→ℕ (suc r) x))
+
+NPos→ℕsucNPos : ∀ r → (p : NPos r) → NPos→ℕ r (sucNPos p) ≡ suc (NPos→ℕ r p)
+NPos→ℕsucNPos zero npos1 = refl
+NPos→ℕsucNPos zero (x⇀ d p) = cong suc (NPos→ℕsucNPos zero p)
+NPos→ℕsucNPos (suc r) npos1 = {!!}
+    sucn (doubleℕ (DirNum→ℕ (zero-n r))) (doublesℕ r 2)
+  ≡⟨ cong (λ y → sucn y (doublesℕ r 2)) (zero-n→0) ⟩
+    sucn (doubleℕ zero) (doublesℕ r 2)
+  ≡⟨ refl ⟩ 
+    doublesℕ r 2
+  ≡⟨ {!!} ⟩ {!!}
+NPos→ℕsucNPos (suc r) (x⇀ d p) with max? d
+... | no _ = {!!}
+... | yes _ = {!!}
 
 -- zero≠NPos→ℕ : ∀ {r} → (p : NPos r) → ¬ (zero ≡ NPos→ℕ r p)
 -- zero≠NPos→ℕ {r} p = {!!}
 
 ℕ→NPos : ∀ r → ℕ → NPos r
-ℕ→NPos r zero = npos1
+ℕ→NPos zero zero = npos1
 ℕ→NPos zero (suc zero) = npos1
 ℕ→NPos zero (suc (suc n)) = sucNPos (ℕ→NPos zero (suc n))
+ℕ→NPos (suc r) zero = npos1
 ℕ→NPos (suc r) (suc zero) = npos1
 ℕ→NPos (suc r) (suc (suc n)) = sucNPos (ℕ→NPos (suc r) (suc n))
 
