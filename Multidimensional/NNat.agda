@@ -16,6 +16,9 @@ module NNat where
 -- much of this is based directly on the
 -- BinNat module in the Cubical Agda library
 
+sucn : (n : ℕ) → (ℕ → ℕ)
+sucn n = iter n suc
+
 data BNat : Type₀ where
   b0 : BNat
   b1 : BNat
@@ -91,24 +94,42 @@ BNat≡ℕ : BNat ≡ ℕ
 BNat≡ℕ = ua BNat≃ℕ
 
 
--------
 
-sucn : (n : ℕ) → (ℕ → ℕ)
-sucn n = iter n suc
 
-data NPos' (n : ℕ) : Type₀ where
-  nposn : DirNum n → NPos' n
-  xr : DirNum n → NPos' n → NPos' n
+
+---- generalize bnat:
+
+data N (r : ℕ) : Type₀ where
+  bn : DirNum r → N r
+  xr : DirNum r → N r → N r
   
--- we have 2ⁿ constructors, analogues to Pos with 2¹
-sucNPos' : ∀ {n} → NPos' n → NPos' n
-sucNPos' {zero} (nposn tt) = xr tt (nposn tt)
-sucNPos' {zero} (xr tt x) = xr tt (sucNPos' x)
-sucNPos' {suc n} (nposn (↓ , x)) = (nposn (↑ , x))
-sucNPos' {suc n} (nposn (↑ , x)) with max? x
-... | no _ = (nposn (↓ , next x))
-... | yes _ = {!!}
-sucNPos' {suc n} (xr x x₁) = {!!}
+-- we have 2ⁿ "unary" constructors, analogous to BNat with 2¹ (b0 and b1)
+-- rename n to r
+sucN : ∀ {n} → N n → N n
+sucN {zero} (bn tt) = xr tt (bn tt)
+sucN {zero} (xr tt x) = xr tt (sucN x)
+sucN {suc n} (bn (↓ , ds)) = (bn (↑ , ds))
+sucN {suc n} (bn (↑ , ds)) with max? ds
+... | no _ = (bn (↓ , next ds))
+... | yes _ = xr (zero-n (suc n)) (bn (max-n (suc n)))
+sucN {suc n} (xr d x) with max? d
+... | no _ = xr (next d) x
+... | yes _ = xr (zero-n (suc n)) (sucN x)
+
+N→ℕ : (r : ℕ) (x : N r) → ℕ
+N→ℕ zero (bn tt) = zero
+N→ℕ zero (xr tt x) = {!!}
+N→ℕ (suc r) x = {!!}
+
+
+ℕ→N : (r : ℕ) → (n : ℕ) → N r
+ℕ→N r zero = bn (zero-n r)
+ℕ→N zero (suc n) = {!!}
+ℕ→N (suc r) (suc n) = {!!}
+
+
+
+---- pos approach:
 
 data NPos (n : ℕ) : Type₀ where
   npos1 : NPos n
