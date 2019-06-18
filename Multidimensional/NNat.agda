@@ -105,13 +105,15 @@ data N (r : ℕ) : Type₀ where
   
 -- we have 2ⁿ "unary" constructors, analogous to BNat with 2¹ (b0 and b1)
 -- rename n to r
+-- this likely introduces inefficiencies compared
+-- to BinNat, with the max? check etc.
 sucN : ∀ {n} → N n → N n
 sucN {zero} (bn tt) = xr tt (bn tt)
 sucN {zero} (xr tt x) = xr tt (sucN x)
 sucN {suc n} (bn (↓ , ds)) = (bn (↑ , ds))
 sucN {suc n} (bn (↑ , ds)) with max? ds
 ... | no _ = (bn (↓ , next ds))
-... | yes _ = xr (zero-n (suc n)) (bn (max-n (suc n)))
+... | yes _ = xr (zero-n (suc n)) (bn (one-n (suc n)))
 sucN {suc n} (xr d x) with max? d
 ... | no _ = xr (next d) x
 ... | yes _ = xr (zero-n (suc n)) (sucN x)
@@ -131,8 +133,12 @@ N→ℕsucN zero (xr tt x) =
   ∎
 N→ℕsucN (suc r) (bn (↓ , x)) = refl
 N→ℕsucN (suc r) (bn (↑ , x)) with max? x
-... | no _ = {!!}
-... | yes _ = {!!}
+... | no x≠max = 
+          doubleℕ (DirNum→ℕ (next x))
+        ≡⟨ cong doubleℕ (next≡suc r x x≠max)  ⟩ 
+          doubleℕ (suc (DirNum→ℕ x))
+        ∎
+... | yes x≡max = {!!}
 N→ℕsucN (suc r) (xr x x₁) = {!!}
 
 
@@ -163,9 +169,6 @@ N→ℕ→N r x = {!!}
   ≡⟨ cong suc (ℕ→N→ℕ (suc r) n) ⟩ 
     suc n
   ∎
-
-
-
 
 N≃ℕ : (r : ℕ) → N r ≃ ℕ
 N≃ℕ r = isoToEquiv (iso (N→ℕ r) (ℕ→N r) (ℕ→N→ℕ r) (N→ℕ→N r))
