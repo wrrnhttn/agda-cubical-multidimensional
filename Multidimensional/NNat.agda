@@ -141,11 +141,25 @@ N→ℕsucN (suc r) (xr x x₁) = {!!}
 ℕ→N zero (suc n) = xr tt (ℕ→N zero n)
 ℕ→N (suc r) (suc n) = sucN (ℕ→N (suc r) n)
 
+ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
+
 N→ℕ→N : (r : ℕ) → (x : N r) → ℕ→N r (N→ℕ r x) ≡ x
 N→ℕ→N r x = {!!}
 
 ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n
-ℕ→N→ℕ r n = {!!}
+ℕ→N→ℕ zero zero = refl
+ℕ→N→ℕ (suc r) zero = {!!}
+ℕ→N→ℕ zero (suc n) = cong suc (ℕ→N→ℕ zero n)
+ℕ→N→ℕ (suc r) (suc n) = 
+    N→ℕ (suc r) (sucN (ℕ→N (suc r) n))
+  ≡⟨ N→ℕsucN (suc r) (ℕ→N (suc r) n) ⟩ 
+    suc (N→ℕ (suc r) (ℕ→N (suc r) n))
+  ≡⟨ cong suc (ℕ→N→ℕ (suc r) n) ⟩ 
+    suc n
+  ∎
+
+
+
 
 N≃ℕ : (r : ℕ) → N r ≃ ℕ
 N≃ℕ r = isoToEquiv (iso (N→ℕ r) (ℕ→N r) (ℕ→N→ℕ r) (N→ℕ→N r))
