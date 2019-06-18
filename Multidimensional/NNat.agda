@@ -138,7 +138,23 @@ N→ℕsucN (suc r) (bn (↑ , x)) with max? x
         ≡⟨ cong doubleℕ (next≡suc r x x≠max)  ⟩ 
           doubleℕ (suc (DirNum→ℕ x))
         ∎
-... | yes x≡max = {!!}
+... | yes x≡max = 
+          sucn (doubleℕ (DirNum→ℕ (zero-n r)))
+            (doublesℕ r (suc (suc (doubleℕ (doubleℕ (DirNum→ℕ (zero-n r)))))))
+        ≡⟨ {!!} ⟩ 
+          sucn (doubleℕ zero) (doublesℕ r (suc (suc (doubleℕ (doubleℕ zero)))))
+        ≡⟨ {!!} ⟩ {!
+          (doublesℕ r (suc (suc (doubleℕ (doubleℕ zero)))))
+        ≡⟨ ? ⟩
+          doublesℕ r (suc (suc zero))
+        ≡⟨ ? ⟩
+          doublesℕ (suc r) (suc zero) -- 2^(r+1)
+        ≡⟨ ? ⟩
+          ?
+        ≡⟨ ? ⟩
+          suc (suc (doubleℕ (DirNum→ℕ x))) -- 2*(2^r - 1) + 2 = 2^(r+1) - 2 + 2 = 2^(r+1)
+!}
+
 N→ℕsucN (suc r) (xr x x₁) = {!!}
 
 
