@@ -9,7 +9,7 @@ open import Cubical.Data.Prod
 
 module Direction where
 
--- "Direction" type for determining direction in spatial structures./
+-- "Direction" type for determining direction in spatial structures.
 -- We interpret ↓ as 0 and ↑ as 1 when used in numerals in
 -- numerical types.
 data Dir : Type₀ where
@@ -35,6 +35,9 @@ DirNum : ℕ → Type₀
 DirNum zero = Unit
 DirNum (suc n) = Dir × (DirNum n)
 
+sucDoubleDirNum : (r : ℕ) → DirNum r → DirNum (suc r)
+sucDoubleDirNum r x = (↑ , x)
+
 DirNum→ℕ : ∀ {n} → DirNum n → ℕ
 DirNum→ℕ {zero} tt = zero
 DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d)
@@ -57,6 +60,7 @@ next : ∀ {n} → DirNum n → DirNum n
 next {zero} tt = tt
 next {suc n} (↓ , ds) = (↑ , ds)
 next {suc n} (↑ , ds) = (↓ , next ds)
+
 
 prev : ∀ {n} → DirNum n → DirNum n
 prev {zero} tt = tt
@@ -119,3 +123,49 @@ max? {suc n} (↑ , ds) with max? ds
 maxn+1≡↑maxn : ∀ n → max-n (suc n) ≡ (↑ , (max-n n))
 maxn+1≡↑maxn n = refl
 
+-- TODO: rename?
+nextsuc-lemma : (r : ℕ) (x : DirNum r) →
+         ¬ ((sucDoubleDirNum r x) ≡ max-n (suc r)) → ¬ (x ≡ max-n r)
+nextsuc-lemma zero tt ¬H = ⊥-elim (¬H refl)
+nextsuc-lemma (suc r) (↓ , x) ¬H = ¬↓,d≡↑,d′ x (max-n r)
+nextsuc-lemma (suc r) (↑ , x) ¬H =
+  λ h → ¬H (H (dropLeast≡ x (max-n r) ↑ h)) --⊥-elim (¬H H)
+  where
+    H : (x ≡ max-n r) →
+         sucDoubleDirNum (suc r) (↑ , x) ≡ (↑ , (↑ , max-n r))
+    H x≡maxnr = 
+        sucDoubleDirNum (suc r) (↑ , x)
+      ≡⟨ cong (λ y → sucDoubleDirNum (suc r) (↑ , y)) x≡maxnr ⟩
+        sucDoubleDirNum (suc r) (↑ , max-n r)
+      ≡⟨ refl ⟩ 
+        (↑ , (↑ , max-n r))
+      ∎
+
+
+    
+
+
+
+next≡suc : (r : ℕ) (x : DirNum r) →
+            ¬ (x ≡ max-n r) → DirNum→ℕ (next x) ≡ suc (DirNum→ℕ x)
+next≡suc zero tt ¬x≡maxnr = ⊥-elim (¬x≡maxnr refl)
+next≡suc (suc r) (↓ , x) ¬x≡maxnr = refl
+next≡suc (suc r) (↑ , x) ¬x≡maxnr = 
+    doubleℕ (DirNum→ℕ (next x))
+  ≡⟨ cong doubleℕ (next≡suc r x (nextsuc-lemma r x ¬x≡maxnr)) ⟩
+    doubleℕ (suc (DirNum→ℕ x))
+  ≡⟨ refl ⟩ 
+    suc (suc (doubleℕ (DirNum→ℕ x)))
+  ∎
+
+-- doublesuclemma : (r : ℕ) (x : DirNum (suc r)) →
+--          doubleℕ (DirNum→ℕ (next x)) ≡ suc (suc (doubleℕ (DirNum→ℕ x)))
+-- doublesuclemma zero (↓ , x₁) = refl
+-- doublesuclemma zero (↑ , x₁) = {!!}
+-- doublesuclemma (suc r) x = {!!}
+  --     doubleℕ (DirNum→ℕ (next x))
+  -- ≡⟨ cong doubleℕ (next≡suc r x ¬x≡maxnr) ⟩
+  --   doubleℕ (suc (DirNum→ℕ x))
+  -- ≡⟨ refl ⟩ 
+  --   suc (suc (doubleℕ (DirNum→ℕ x)))
+  -- ∎
