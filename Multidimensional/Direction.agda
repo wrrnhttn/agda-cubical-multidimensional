@@ -58,6 +58,11 @@ next {zero} tt = tt
 next {suc n} (↓ , ds) = (↑ , ds)
 next {suc n} (↑ , ds) = (↓ , next ds)
 
+prev : ∀ {n} → DirNum n → DirNum n
+prev {zero} tt = tt
+prev {suc n} (↓ , ds) = (↓ , prev ds)
+prev {suc n} (↑ , ds) = (↓ , ds)
+
 zero-n : (n : ℕ) → DirNum n
 zero-n zero = tt
 zero-n (suc n) = (↓ , zero-n n)
