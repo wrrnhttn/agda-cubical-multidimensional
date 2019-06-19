@@ -106,6 +106,8 @@ s NatImplBNat = sucBNat
 data N (r : ℕ) : Type₀ where
   bn : DirNum r → N r
   xr : DirNum r → N r → N r
+
+-- should define induction principle for N r
   
 -- we have 2ⁿ "unary" constructors, analogous to BNat with 2¹ (b0 and b1)
 -- rename n to r
@@ -135,31 +137,37 @@ N→ℕsucN zero (xr tt x) =
   ≡⟨ cong suc (N→ℕsucN zero x) ⟩ 
     suc (suc (N→ℕ zero x))
   ∎
-N→ℕsucN (suc r) (bn (↓ , x)) = refl
-N→ℕsucN (suc r) (bn (↑ , x)) with max? x
-... | no x≠max = 
-          doubleℕ (DirNum→ℕ (next x))
-        ≡⟨ cong doubleℕ (next≡suc r x x≠max)  ⟩ 
-          doubleℕ (suc (DirNum→ℕ x))
+N→ℕsucN (suc r) (bn (↓ , d)) = refl
+N→ℕsucN (suc r) (bn (↑ , d)) with max? d
+... | no d≠max = 
+          doubleℕ (DirNum→ℕ (next d))
+        ≡⟨ cong doubleℕ (next≡suc r d d≠max)  ⟩ 
+          doubleℕ (suc (DirNum→ℕ d))
         ∎
-... | yes x≡max = 
+... | yes d≡max = -- this can probably be shortened by not reducing down to zero
           sucn (doubleℕ (DirNum→ℕ (zero-n r)))
             (doublesℕ r (suc (suc (doubleℕ (doubleℕ (DirNum→ℕ (zero-n r)))))))
-        ≡⟨ {!!} ⟩ 
+        ≡⟨ cong (λ x → sucn (doubleℕ x) (doublesℕ r (suc (suc (doubleℕ (doubleℕ x)))))) (zero-n→0 {r}) ⟩ 
           sucn (doubleℕ zero) (doublesℕ r (suc (suc (doubleℕ (doubleℕ zero)))))
-        ≡⟨ {!!} ⟩ {!
-          (doublesℕ r (suc (suc (doubleℕ (doubleℕ zero)))))
-        ≡⟨ ? ⟩
+        ≡⟨ refl ⟩
           doublesℕ r (suc (suc zero))
-        ≡⟨ ? ⟩
+        ≡⟨ refl ⟩
           doublesℕ (suc r) (suc zero) -- 2^(r+1)
-        ≡⟨ ? ⟩
-          ?
-        ≡⟨ ? ⟩
-          suc (suc (doubleℕ (DirNum→ℕ x))) -- 2*(2^r - 1) + 2 = 2^(r+1) - 2 + 2 = 2^(r+1)
-!}
-
-N→ℕsucN (suc r) (xr x x₁) = {!!}
+        ≡⟨ refl ⟩
+          doublesℕ r (suc (suc zero))  -- 2^r * 2
+        ≡⟨ {!refl!} ⟩
+          doubleℕ (doublesℕ r (suc zero)) --2*2^r
+        ≡⟨ {!refl!} ⟩
+          suc (suc (predℕ (predℕ (doubleℕ (doublesℕ r (suc zero))))))
+        ≡⟨ cong (λ x → suc (suc x)) (sym (doublePred (doublesℕ r (suc zero)))) ⟩
+          suc (suc (doubleℕ (predℕ (doublesℕ r (suc zero)))))
+        ≡⟨ cong (λ x → suc (suc (doubleℕ x))) (sym (maxr≡pred2ʳ r d d≡max)) ⟩
+          suc (suc (doubleℕ (DirNum→ℕ d))) -- 2*(2^r - 1) + 2 = 2^(r+1) - 2 + 2 = 2^(r+1)
+        ∎
+N→ℕsucN (suc r) (xr (↓ , d) x) = refl
+N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
+... | no x≠max = {!!}
+... | yes x≡max = {!!}
 
 
 ℕ→N : (r : ℕ) → (n : ℕ) → N r
@@ -169,8 +177,60 @@ N→ℕsucN (suc r) (xr x x₁) = {!!}
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
 
+-- NℕNlemma is actually a pretty important fact;
+-- this is what allows the direct isomorphism of N and ℕ to go
+-- without the need for an extra datatype, e.g. Pos for BinNat,
+-- since each ℕ < 2^r maps to its "numeral" in N r.
+-- should rename and move elsewhere.
+numeral-next : (r : ℕ) (d : DirNum r) → N (suc r)
+numeral-next r d = bn (embed-next r d)
+
+
+-- 
+NℕNlemma : (r : ℕ) (d : DirNum r) → ℕ→N r (DirNum→ℕ d) ≡ bn d
+NℕNlemma zero tt = refl
+NℕNlemma (suc r) (↓ , ds) = 
+    ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
+  ≡⟨ cong (ℕ→N (suc r)) (double-lemma ds) ⟩ 
+    ℕ→N (suc r) (DirNum→ℕ {suc r} (↓ , ds))
+  ≡⟨ refl ⟩ 
+    ℕ→N (suc r) (doublesℕ (suc zero) (DirNum→ℕ ds))
+  ≡⟨ refl ⟩ 
+    ℕ→N (suc r) (doublesℕ zero (doubleℕ (DirNum→ℕ ds)))
+  ≡⟨ refl ⟩ 
+    ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
+  ≡⟨ {!!} ⟩ {!!}
+NℕNlemma (suc r) (↑ , ds) = {!!}
+
 N→ℕ→N : (r : ℕ) → (x : N r) → ℕ→N r (N→ℕ r x) ≡ x
-N→ℕ→N r x = {!!}
+N→ℕ→N zero (bn tt) = refl
+N→ℕ→N zero (xr tt x) = cong (xr tt) (N→ℕ→N zero x)
+N→ℕ→N (suc r) (bn (↓ , ds)) = 
+    ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
+  ≡⟨ cong (λ x → ℕ→N (suc r) x) (double-lemma ds) ⟩ 
+    ℕ→N (suc r) (DirNum→ℕ {suc r} (↓ , ds))
+  ≡⟨ NℕNlemma (suc r) (↓ , ds) ⟩ 
+    bn (↓ , ds)
+  ∎
+N→ℕ→N (suc r) (bn (↑ , ds)) = 
+    sucN (ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds)))
+  ≡⟨ cong (λ x → sucN (ℕ→N (suc r) x)) (double-lemma ds) ⟩ 
+    sucN (ℕ→N (suc r) (DirNum→ℕ {suc r} (↓ , ds)))
+  ≡⟨ cong sucN (NℕNlemma (suc r) (↓ , ds)) ⟩ 
+    sucN (bn (↓ , ds))
+  ≡⟨ refl ⟩
+    bn (↑ , ds)
+  ∎
+N→ℕ→N (suc r) (xr (↓ , ds) x) = 
+     ℕ→N (suc r)
+      (sucn (doubleℕ (DirNum→ℕ ds))
+       (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))
+   ≡⟨ {!!} ⟩ 
+      ℕ→N (suc r)
+      (sucn (DirNum→ℕ {suc r} (↓ , ds))
+       (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))
+   ≡⟨ {!!} ⟩ {!!}
+N→ℕ→N (suc r) (xr (↑ , ds) x) = {!!}
 
 ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n
 ℕ→N→ℕ zero zero = refl

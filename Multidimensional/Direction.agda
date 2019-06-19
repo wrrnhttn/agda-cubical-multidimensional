@@ -15,6 +15,10 @@ doublePred : (n : ℕ) → doubleℕ (predℕ n) ≡ predℕ (predℕ (doubleℕ
 doublePred zero = refl
 doublePred (suc n) = refl
 
+-- doubleDoublesPred : (n : ℕ) → doublesℕ n 1 ≡ 
+-- doubleDoublesPred zero = refl
+-- doubleDoublesPred (suc n) = {!!}
+
 sucPred : (n : ℕ) → ¬ (n ≡ zero) → suc (predℕ n) ≡ n
 sucPred zero 0≠0 = ⊥-elim (0≠0 refl)
 sucPred (suc n) sucn≠0 = refl
