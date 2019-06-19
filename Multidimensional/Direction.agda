@@ -9,6 +9,36 @@ open import Cubical.Data.Prod
 
 module Direction where
 
+-- some nat things. move to own module?
+
+doublePred : (n : ℕ) → doubleℕ (predℕ n) ≡ predℕ (predℕ (doubleℕ n))
+doublePred zero = refl
+doublePred (suc n) = refl
+
+sucPred : (n : ℕ) → ¬ (n ≡ zero) → suc (predℕ n) ≡ n
+sucPred zero 0≠0 = ⊥-elim (0≠0 refl)
+sucPred (suc n) sucn≠0 = refl
+
+doubleDoubles : (n m : ℕ) → doubleℕ (doublesℕ n m) ≡ doublesℕ (suc n) m
+doubleDoubles zero m = refl
+doubleDoubles (suc n) m = doubleDoubles n (doubleℕ m)
+
+doublePos : (n : ℕ) → ¬ (n ≡ 0) → ¬ (doubleℕ n ≡ 0)
+doublePos zero 0≠0 = ⊥-elim (0≠0 refl)
+doublePos (suc n) sn≠0 = snotz
+
+doublesPos : (n m : ℕ) → ¬ (m ≡ 0) → ¬ (doublesℕ n m ≡ 0)
+doublesPos zero m m≠0 = m≠0
+doublesPos (suc n) m m≠0 = doublesPos n (doubleℕ m) (doublePos m (m≠0))
+
+predDoublePos : (n : ℕ) → ¬ (n ≡ 0) → ¬ (predℕ (doubleℕ n)) ≡ 0
+predDoublePos zero n≠0 = ⊥-elim (n≠0 refl)
+predDoublePos (suc n) sn≠0 = snotz
+
+-- predDoubles : (n m : ℕ) → ¬ (n ≡ 0) → ¬ (m ≡ 0) → ¬ (predℕ (doublesℕ n m)) ≡ 0
+-- predDoubles zero m n≠0 m≠0 = ⊥-elim (n≠0 refl)
+-- predDoubles (suc n) m sn≠0 m≠0 = {!!}
+
 -- "Direction" type for determining direction in spatial structures.
 -- We interpret ↓ as 0 and ↑ as 1 when used in numerals in
 -- numerical types.
