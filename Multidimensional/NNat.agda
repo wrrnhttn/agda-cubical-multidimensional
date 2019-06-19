@@ -93,7 +93,11 @@ BNat≃ℕ = isoToEquiv (iso BNat→ℕ ℕ→BNat ℕ→BNat→ℕ BNat→ℕ�
 BNat≡ℕ : BNat ≡ ℕ
 BNat≡ℕ = ua BNat≃ℕ
 
+open NatImpl
 
+NatImplBNat : NatImpl BNat
+z NatImplBNat = b0
+s NatImplBNat = sucBNat
 
 
 
