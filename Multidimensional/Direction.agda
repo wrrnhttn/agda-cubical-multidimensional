@@ -68,10 +68,18 @@ DirNum (suc n) = Dir × (DirNum n)
 sucDoubleDirNum : (r : ℕ) → DirNum r → DirNum (suc r)
 sucDoubleDirNum r x = (↑ , x)
 
+doubleDirNum : (r : ℕ) → DirNum r → DirNum (suc r)
+doubleDirNum r x = (↓ , x)
+
+
 DirNum→ℕ : ∀ {n} → DirNum n → ℕ
 DirNum→ℕ {zero} tt = zero
 DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d)
 DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
+
+double-lemma : ∀ {r} → (d : DirNum r) →
+                doubleℕ (DirNum→ℕ d) ≡ DirNum→ℕ (doubleDirNum r d)
+double-lemma {r} d = refl
 
 ¬↓,d≡↑,d′ : ∀ {n} → ∀ (d d′ : DirNum n) → ¬ (↓ , d) ≡ (↑ , d′)
 ¬↓,d≡↑,d′ {n} d d′ ↓,d≡↑,d′ = ¬↓≡↑ (cong proj₁ ↓,d≡↑,d′)
@@ -137,6 +145,8 @@ max-n : (n : ℕ) → DirNum n
 max-n zero = tt
 max-n (suc n) = (↑ , max-n n)
 
+--DirNum→ℕ (max-n r) ≡ 
+
 max? : ∀ {n} → (x : DirNum n) → Dec (x ≡ max-n n)
 max? {zero} tt = yes refl
 max? {suc n} (↓ , ds) = no ((¬↓,d≡↑,d′ ds (max-n n)))
@@ -152,6 +162,41 @@ max? {suc n} (↑ , ds) with max? ds
 
 maxn+1≡↑maxn : ∀ n → max-n (suc n) ≡ (↑ , (max-n n))
 maxn+1≡↑maxn n = refl
+
+maxr≡pred2ʳ : (r : ℕ) (d : DirNum r) →
+           d ≡ max-n r → DirNum→ℕ d ≡ predℕ (doublesℕ r (suc zero))
+maxr≡pred2ʳ zero d d≡max = refl
+maxr≡pred2ʳ (suc r) (↓ , ds) d≡max = ⊥-elim ((¬↓,d≡↑,d′ ds (max-n r)) d≡max) 
+maxr≡pred2ʳ (suc r) (↑ , ds) d≡max = 
+     suc (doubleℕ (DirNum→ℕ ds))
+   ≡⟨ cong (λ x → suc (doubleℕ x)) (maxr≡pred2ʳ r ds ds≡max) ⟩
+     suc (doubleℕ (predℕ (doublesℕ r (suc zero)))) -- 2*(2^r - 1) + 1 = 2^r+1 - 1
+   ≡⟨ cong suc (doublePred (doublesℕ r (suc zero))) ⟩ 
+     suc (predℕ (predℕ (doubleℕ (doublesℕ r (suc zero)))))
+   ≡⟨ sucPred (predℕ (doubleℕ (doublesℕ r (suc zero)))) (
+              (predDoublePos (doublesℕ r (suc zero)) ((doublesPos r 1 snotz)))) ⟩
+     predℕ (doubleℕ (doublesℕ r (suc zero)))
+   ≡⟨ cong predℕ (doubleDoubles r (suc zero)) ⟩
+     predℕ (doublesℕ (suc r) 1)
+   ≡⟨ refl ⟩
+     predℕ (doublesℕ r 2) -- 2^r*2 - 1 = 2^(r+1) - 1
+   ∎
+  where
+    ds≡max : ds ≡ max-n r
+    ds≡max = dropLeast≡ ds (max-n r) ↑ d≡max
+
+-- TODO: rename
+embed-next : (r : ℕ) → DirNum r → DirNum (suc r)
+embed-next zero tt = (↓ , tt)
+embed-next (suc r) (d , ds) with zero-n? ds
+... | no _ = (d , embed-next r ds)
+... | yes _ = (d , zero-n (suc r))
+
+-- embed-next-thm : (r : ℕ) (d : DirNum r) → DirNum→ℕ d ≡ DirNum→ℕ (embed-next r d)
+-- embed-next-thm zero d = refl
+-- embed-next-thm (suc r) (d , ds) with zero-n? ds
+-- ... | no _ = {!!}
+-- ... | yes _ = {!!}
 
 -- TODO: rename?
 nextsuc-lemma : (r : ℕ) (x : DirNum r) →
@@ -170,10 +215,6 @@ nextsuc-lemma (suc r) (↑ , x) ¬H =
       ≡⟨ refl ⟩ 
         (↑ , (↑ , max-n r))
       ∎
-
-
-    
-
 
 
 next≡suc : (r : ℕ) (x : DirNum r) →
