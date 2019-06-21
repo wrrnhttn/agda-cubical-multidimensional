@@ -150,14 +150,12 @@ N→ℕsucN (suc r) (bn (↑ , d)) with max? d
         ≡⟨ cong (λ x → sucn (doubleℕ x) (doublesℕ r (suc (suc (doubleℕ (doubleℕ x)))))) (zero-n→0 {r}) ⟩ 
           sucn (doubleℕ zero) (doublesℕ r (suc (suc (doubleℕ (doubleℕ zero)))))
         ≡⟨ refl ⟩
-          doublesℕ r (suc (suc zero))
-        ≡⟨ refl ⟩
           doublesℕ (suc r) (suc zero) -- 2^(r+1)
-        ≡⟨ refl ⟩
-          doublesℕ r (suc (suc zero))  -- 2^r * 2
-        ≡⟨ {!refl!} ⟩
+        ≡⟨ sym (doubleDoubles r 1) ⟩
           doubleℕ (doublesℕ r (suc zero)) --2*2^r
-        ≡⟨ {!refl!} ⟩
+        ≡⟨ sym (sucPred (doubleℕ (doublesℕ r (suc zero))) (doubleDoublesOne≠0 r)) ⟩
+          suc (predℕ (doubleℕ (doublesℕ r (suc zero))))
+        ≡⟨ cong suc (sym (sucPred (predℕ (doubleℕ (doublesℕ r (suc zero)))) (predDoubleDoublesOne≠0 r))) ⟩
           suc (suc (predℕ (predℕ (doubleℕ (doublesℕ r (suc zero))))))
         ≡⟨ cong (λ x → suc (suc x)) (sym (doublePred (doublesℕ r (suc zero)))) ⟩
           suc (suc (doubleℕ (predℕ (doublesℕ r (suc zero)))))
