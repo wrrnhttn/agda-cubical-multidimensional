@@ -11,6 +11,11 @@ module Direction where
 
 -- some nat things. move to own module?
 
+
+
+sucn : (n : ℕ) → (ℕ → ℕ)
+sucn n = iter n suc
+
 doublePred : (n : ℕ) → doubleℕ (predℕ n) ≡ predℕ (predℕ (doubleℕ n))
 doublePred zero = refl
 doublePred (suc n) = refl
@@ -49,6 +54,71 @@ doubleDoublesOne≠0 (suc n) = doublePos (doublesℕ n 2) (doublesPos n 2 (snotz
 predDoubleDoublesOne≠0 : (n : ℕ) → ¬ (predℕ (doubleℕ (doublesℕ n (suc zero))) ≡ 0)
 predDoubleDoublesOne≠0 zero = snotz
 predDoubleDoublesOne≠0 (suc n) = predDoublePos (doublesℕ n 2) (doublesPos n 2 snotz)
+
+doublesZero : (n : ℕ) → doublesℕ n zero ≡ zero
+doublesZero zero = refl
+doublesZero (suc n) = doublesZero n
+
+-- 2^n(m+1) = (2^n)m + 2^n
+-- doublesSuc : (n m : ℕ) → doublesℕ n (suc m) ≡ sucn (doublesℕ n 1) (doublesℕ n m)
+-- doublesSuc zero m = refl
+-- doublesSuc (suc n) m = 
+--     doublesℕ n (suc (suc (doubleℕ m)))
+--   ≡⟨ doublesSuc n (suc (doubleℕ m)) ⟩ 
+--     sucn (doublesℕ n 1) (doublesℕ n (suc (doubleℕ m)))
+--   ≡⟨ cong (λ z → sucn (doublesℕ n 1) z) (doublesSuc n (doubleℕ m)) ⟩ 
+--      sucn (doublesℕ n 1) (sucn (doublesℕ n 1) (doublesℕ n (doubleℕ m)))
+--    ≡⟨ sucnDoubles n (doublesℕ n (doubleℕ m)) ⟩ 
+--      sucn (doublesℕ n 2) (doublesℕ n (doubleℕ m))
+--    ∎
+--    where
+--      sucnDoubles : (n m : ℕ) → sucn (doublesℕ n 1) (sucn (doublesℕ n 1) m) ≡ sucn (doublesℕ n 2) m
+--      sucnDoubles zero m = refl
+--      sucnDoubles (suc n) m = 
+--          sucn (doublesℕ n 2) (sucn (doublesℕ n 2) m)
+--        ≡⟨ sym (sucnDoubles n (sucn (doublesℕ n 2) m)) ⟩ 
+--          sucn (doublesℕ n 1) (sucn (doublesℕ n 1) (sucn (doublesℕ n 2) m))
+--        ≡⟨ {!!} ⟩ {!!}
+
+-- 2 * (i + n) = 2*i + 2*n
+doubleSucn : (i n : ℕ) →  doubleℕ (sucn i n) ≡ sucn (doubleℕ i) (doubleℕ n)
+doubleSucn zero n = refl
+doubleSucn (suc i) n = 
+    suc (suc (doubleℕ (sucn i n)))
+  ≡⟨ cong (λ z → suc (suc z)) (doubleSucn i n) ⟩ 
+    suc (suc (sucn (doubleℕ i) (doubleℕ n)))
+  ≡⟨ refl ⟩ 
+    suc (sucn (suc (doubleℕ i)) (doubleℕ n))
+  ≡⟨ cong suc refl ⟩ 
+    sucn (suc (suc (doubleℕ i))) (doubleℕ n)
+  ∎
+
+
+doublesSucn : (i n m : ℕ) → doublesℕ n (sucn i m) ≡ sucn (doublesℕ n i) (doublesℕ n m)
+doublesSucn i zero m = refl
+doublesSucn i (suc n) m = 
+    doublesℕ n (doubleℕ (sucn i m))
+  ≡⟨  cong (doublesℕ n) (doubleSucn i m) ⟩ 
+    doublesℕ n (sucn (doubleℕ i) (doubleℕ m))
+  ≡⟨ doublesSucn (doubleℕ i) n (doubleℕ m) ⟩ 
+     sucn (doublesℕ n (doubleℕ i)) (doublesℕ n (doubleℕ m))
+  ∎
+
+-- 2^n * (m + 2) =
+doublesSucSuc : (n m : ℕ) → doublesℕ n (suc (suc m)) ≡ sucn (doublesℕ (suc n) 1) (doublesℕ n m)
+doublesSucSuc zero m = refl
+doublesSucSuc (suc n) m = 
+    doublesℕ (suc n) (suc (suc m))
+  ≡⟨ refl ⟩
+    doublesℕ n (sucn 4 (doubleℕ m))
+  ≡⟨ doublesSucn 4 n (doubleℕ m) ⟩ 
+    sucn (doublesℕ n 4) (doublesℕ n (doubleℕ m))
+  ∎
+  where
+   
+
+
+
   
 
 -- predDoubles : (n m : ℕ) → ¬ (n ≡ 0) → ¬ (m ≡ 0) → ¬ (predℕ (doublesℕ n m)) ≡ 0
