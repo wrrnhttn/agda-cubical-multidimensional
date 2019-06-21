@@ -23,6 +23,9 @@ sucPred : (n : ℕ) → ¬ (n ≡ zero) → suc (predℕ n) ≡ n
 sucPred zero 0≠0 = ⊥-elim (0≠0 refl)
 sucPred (suc n) sucn≠0 = refl
 
+predSucSuc : (n : ℕ) → ¬ (predℕ (suc (suc n)) ≡ 0)
+predSucSuc n = snotz
+
 doubleDoubles : (n m : ℕ) → doubleℕ (doublesℕ n m) ≡ doublesℕ (suc n) m
 doubleDoubles zero m = refl
 doubleDoubles (suc n) m = doubleDoubles n (doubleℕ m)
@@ -38,6 +41,15 @@ doublesPos (suc n) m m≠0 = doublesPos n (doubleℕ m) (doublePos m (m≠0))
 predDoublePos : (n : ℕ) → ¬ (n ≡ 0) → ¬ (predℕ (doubleℕ n)) ≡ 0
 predDoublePos zero n≠0 = ⊥-elim (n≠0 refl)
 predDoublePos (suc n) sn≠0 = snotz
+
+doubleDoublesOne≠0 : (n : ℕ) → ¬ (doubleℕ (doublesℕ n (suc zero)) ≡ 0)
+doubleDoublesOne≠0 zero = snotz
+doubleDoublesOne≠0 (suc n) = doublePos (doublesℕ n 2) (doublesPos n 2 (snotz))
+
+predDoubleDoublesOne≠0 : (n : ℕ) → ¬ (predℕ (doubleℕ (doublesℕ n (suc zero))) ≡ 0)
+predDoubleDoublesOne≠0 zero = snotz
+predDoubleDoublesOne≠0 (suc n) = predDoublePos (doublesℕ n 2) (doublesPos n 2 snotz)
+  
 
 -- predDoubles : (n m : ℕ) → ¬ (n ≡ 0) → ¬ (m ≡ 0) → ¬ (predℕ (doublesℕ n m)) ≡ 0
 -- predDoubles zero m n≠0 m≠0 = ⊥-elim (n≠0 refl)
