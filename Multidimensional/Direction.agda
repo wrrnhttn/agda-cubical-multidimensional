@@ -62,7 +62,7 @@ caseDir ad au ↑ = au
 
 -- Dependent "directional numerals":
 -- for natural n, obtain 2ⁿ "numerals".
--- This is basically a big-endian binary notation.
+-- This is basically a little-endian binary notation.
 -- NOTE: Would an implementation of DirNum with dependent vectors be preferable
 --       over using products?
 DirNum : ℕ → Type₀
