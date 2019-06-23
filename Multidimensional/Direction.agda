@@ -231,7 +231,34 @@ max-n : (n : ℕ) → DirNum n
 max-n zero = tt
 max-n (suc n) = (↑ , max-n n)
 
---DirNum→ℕ (max-n r) ≡ 
+max→ℕ : (r : ℕ) → DirNum→ℕ (max-n r) ≡ predℕ (doublesℕ r 1)
+max→ℕ zero = refl
+max→ℕ (suc r) = 
+    suc (doubleℕ (DirNum→ℕ (max-n r)))
+  ≡⟨ cong (λ z → suc (doubleℕ z)) (max→ℕ r) ⟩
+    suc (doubleℕ (predℕ (doublesℕ r 1)))
+  ≡⟨ cong suc (doublePred (doublesℕ r 1)) ⟩ 
+    suc (predℕ (predℕ (doubleℕ (doublesℕ r 1))))
+  ≡⟨ cong (λ z → suc (predℕ (predℕ z))) (doubleDoubles r 1) ⟩ 
+    suc (predℕ (predℕ (doublesℕ (suc r) 1)))
+  ≡⟨ refl ⟩ 
+    suc (predℕ (predℕ (doublesℕ r 2)))
+  ≡⟨ sucPred (predℕ (doublesℕ r 2)) H ⟩ 
+    predℕ (doublesℕ r 2)
+  ∎
+  where
+    G : (r : ℕ) → doubleℕ (doublesℕ r 1) ≡ doublesℕ r 2
+    G zero = refl
+    G (suc r) = doubleℕ (doublesℕ r 2) ≡⟨ doubleDoubles r 2 ⟩
+                 doublesℕ (suc r) 2 ≡⟨ refl ⟩ doublesℕ r (doubleℕ 2) ∎
+    H : ¬ predℕ (doublesℕ r 2) ≡ zero
+    H = λ h → (predDoublePos (doublesℕ r 1) (doublesPos r 1 snotz)
+        ((
+          predℕ (doubleℕ (doublesℕ r 1)) ≡⟨ cong predℕ (G r) ⟩
+          predℕ (doublesℕ r 2) ≡⟨ h ⟩
+          0 ∎
+         ))) 
+    
 
 max? : ∀ {n} → (x : DirNum n) → Dec (x ≡ max-n n)
 max? {zero} tt = yes refl
