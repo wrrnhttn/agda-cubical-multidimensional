@@ -6,6 +6,7 @@ open import Cubical.Foundations.Equiv
 open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat
+open import Cubical.Data.Empty
 open import Cubical.Data.Unit
 open import Cubical.Data.Prod
 open import Cubical.Data.BinNat
@@ -15,9 +16,6 @@ open import Direction
 module NNat where
 -- much of this is based directly on the
 -- BinNat module in the Cubical Agda library
-
-sucn : (n : ℕ) → (ℕ → ℕ)
-sucn n = iter n suc
 
 data BNat : Type₀ where
   b0 : BNat
@@ -107,6 +105,7 @@ data N (r : ℕ) : Type₀ where
   bn : DirNum r → N r
   xr : DirNum r → N r → N r
 
+
 -- should define induction principle for N r
   
 -- we have 2ⁿ "unary" constructors, analogous to BNat with 2¹ (b0 and b1)
@@ -123,6 +122,21 @@ sucN {suc n} (bn (↑ , ds)) with max? ds
 sucN {suc n} (xr d x) with max? d
 ... | no _ = xr (next d) x
 ... | yes _ = xr (zero-n (suc n)) (sucN x)
+
+sucnN : {r : ℕ} → (n : ℕ) → (N r → N r)
+sucnN n = iter n sucN
+
+doubleN : (r : ℕ) → N r → N r
+doubleN zero (bn tt) = bn tt
+doubleN zero (xr d x) = sucN (sucN (doubleN zero x))
+doubleN (suc r) (bn x) with zero-n? x
+... | yes _ = bn x
+... | no _ = {!sucN (sucN (doubleN (suc r) x))!}
+doubleN (suc r) (xr x x₁) = {!sucN (sucN (doubleN (suc r)!}
+
+doublesN : (r : ℕ) → ℕ → N r → N r
+doublesN r zero m = m
+doublesN r (suc n) m = doublesN r n (doubleN r m)
 
 N→ℕ : (r : ℕ) (x : N r) → ℕ
 N→ℕ zero (bn tt) = zero
@@ -164,8 +178,71 @@ N→ℕsucN (suc r) (bn (↑ , d)) with max? d
         ∎
 N→ℕsucN (suc r) (xr (↓ , d) x) = refl
 N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
-... | no x≠max = {!!}
-... | yes x≡max = {!!}
+... | no d≠max = 
+          sucn (doubleℕ (DirNum→ℕ (next d)))
+           (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))
+        ≡⟨ cong (λ y → sucn (doubleℕ y) (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))) (next≡suc r d d≠max) ⟩ 
+          sucn (doubleℕ (suc (DirNum→ℕ d)))
+           (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))
+        ≡⟨ refl ⟩ 
+          suc
+           (suc
+            (iter (doubleℕ (DirNum→ℕ d)) suc
+            (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+        ∎
+... | yes d≡max = 
+        sucn (doubleℕ (DirNum→ℕ (zero-n r)))
+        (doublesℕ r (doubleℕ (N→ℕ (suc r) (sucN x))))
+      ≡⟨ cong (λ z → sucn (doubleℕ z) (doublesℕ r (doubleℕ (N→ℕ (suc r) (sucN x))))) (zero-n≡0 {r}) ⟩ 
+        sucn (doubleℕ zero)
+        (doublesℕ r (doubleℕ (N→ℕ (suc r) (sucN x))))
+      ≡⟨ refl ⟩ 
+        doublesℕ r (doubleℕ (N→ℕ (suc r) (sucN x)))
+      ≡⟨ cong (λ x → doublesℕ r (doubleℕ x)) (N→ℕsucN (suc r) x)  ⟩ 
+        doublesℕ r (doubleℕ (suc (N→ℕ (suc r) x)))
+      ≡⟨ refl ⟩ 
+        doublesℕ r (suc (suc (doubleℕ (N→ℕ (suc r) x)))) -- 2^r * (2x + 2) = 2^(r+1)x + 2^(r+1)
+      ≡⟨ doublesSucSuc r (doubleℕ (N→ℕ (suc r) x)) ⟩ 
+        sucn (doublesℕ (suc r) 1) -- _ + 2^(r+1)
+         (doublesℕ (suc r) (N→ℕ (suc r) x)) --  2^(r+1)x + 2^(r+1)
+      ≡⟨ H r (doublesℕ (suc r) (N→ℕ (suc r) x)) ⟩
+        suc
+         (suc
+          (sucn (doubleℕ (predℕ (doublesℕ r 1))) -- _ + 2(2^r - 1) + 2
+           (doublesℕ (suc r) (N→ℕ (suc r) x))))
+      ≡⟨ refl ⟩
+        suc
+         (suc
+          (sucn (doubleℕ (predℕ (doublesℕ r 1)))
+           (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+      ≡⟨ cong (λ z → suc (suc (sucn (doubleℕ z) (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))) (sym (max→ℕ r))  ⟩
+         suc
+         (suc
+          (sucn (doubleℕ (DirNum→ℕ (max-n r)))
+           (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+      ≡⟨ cong (λ z → suc (suc (sucn (doubleℕ (DirNum→ℕ z)) (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))) (sym (d≡max)) ⟩
+         suc
+         (suc
+          (sucn (doubleℕ (DirNum→ℕ d))
+           (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))) -- (2^r*2x + (2*(2^r - 1))) + 2 = 2^(r+1)x + 2^(r+1)
+      ∎
+      where
+        H : (n m : ℕ) → sucn (doublesℕ (suc n) 1) m ≡ suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 1))) m))
+        H zero m = refl
+        H (suc n) m = 
+            sucn (doublesℕ n 4) m
+          ≡⟨ cong (λ z → sucn z m) (doublesSucSuc n 2) ⟩ 
+            sucn (sucn (doublesℕ (suc n) 1) (doublesℕ n 2)) m
+          ≡⟨ refl ⟩ 
+            sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m
+          ≡⟨ {!!} ⟩ 
+            sucn (doubleℕ (doublesℕ n 2)) m
+          ≡⟨ {!!} ⟩ {!!}
+
+
+
+
+
 
 
 ℕ→N : (r : ℕ) → (n : ℕ) → N r
@@ -174,6 +251,8 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
 ℕ→N (suc r) (suc n) = sucN (ℕ→N (suc r) n)
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
+
+ℕ→Nsucn : (r : ℕ) (n m : ℕ) → ℕ→N r (sucn n m) ≡ sucnN n (ℕ→N r m)
 
 -- NℕNlemma is actually a pretty important fact;
 -- this is what allows the direct isomorphism of N and ℕ to go
@@ -223,11 +302,31 @@ N→ℕ→N (suc r) (xr (↓ , ds) x) =
      ℕ→N (suc r)
       (sucn (doubleℕ (DirNum→ℕ ds))
        (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))
-   ≡⟨ {!!} ⟩ 
+   ≡⟨ cong (λ z → ℕ→N (suc r) (sucn z (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))) (double-lemma ds)  ⟩ 
       ℕ→N (suc r)
       (sucn (DirNum→ℕ {suc r} (↓ , ds))
        (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))
-   ≡⟨ {!!} ⟩ {!!}
+   ≡⟨ refl ⟩
+     ℕ→N (suc r)
+      (sucn (DirNum→ℕ {suc r} (↓ , ds))
+       (doublesℕ (suc r) (N→ℕ (suc r) x)))
+   ≡⟨ {!!} ⟩
+     sucnN (DirNum→ℕ {suc r} (↓ , ds))
+      (ℕ→N (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x)))
+   ≡⟨ cong (λ z → sucnN (DirNum→ℕ {suc r} (↓ , ds)) z) (H (suc r) (suc r) (N→ℕ (suc r) x)) ⟩
+     sucnN (DirNum→ℕ {suc r} (↓ , ds))
+      (doublesN (suc r) (suc r) (ℕ→N (suc r) (N→ℕ (suc r) x)))
+   ≡⟨ cong (λ z → sucnN (DirNum→ℕ {suc r} (↓ , ds)) (doublesN (suc r) (suc r) z)) (N→ℕ→N (suc r) x) ⟩
+     sucnN (DirNum→ℕ {suc r} (↓ , ds))
+      (doublesN (suc r) (suc r) x)
+   ≡⟨ G (suc r) (↓ , ds) x snotz ⟩
+     xr (↓ , ds) x ∎
+   where
+     H : (r m n : ℕ) → ℕ→N r (doublesℕ m n) ≡ doublesN r m (ℕ→N r n)
+     G : (r : ℕ) (d : DirNum r) (x : N r) → ¬ (r ≡ 0) → sucnN (DirNum→ℕ {r} d) (doublesN r r x) ≡ xr d x
+     G zero d x 0≠0 = ⊥-elim (0≠0 refl)
+     G (suc r) d x r≠0 = {!!}
+
 N→ℕ→N (suc r) (xr (↑ , ds) x) = {!!}
 
 ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n

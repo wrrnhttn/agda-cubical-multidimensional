@@ -16,6 +16,17 @@ module Direction where
 sucn : (n : ℕ) → (ℕ → ℕ)
 sucn n = iter n suc
 
+sucnsuc : (n m : ℕ) → sucn n (suc m) ≡ suc (sucn n m)
+sucnsuc zero m = refl
+sucnsuc (suc n) m = 
+    sucn (suc n) (suc m)
+  ≡⟨ refl ⟩
+    suc (sucn n (suc m))
+  ≡⟨ cong suc (sucnsuc n m) ⟩ 
+    suc (suc (sucn n m))
+  ∎
+
+
 doublePred : (n : ℕ) → doubleℕ (predℕ n) ≡ predℕ (predℕ (doubleℕ n))
 doublePred zero = refl
 doublePred (suc n) = refl
@@ -114,9 +125,18 @@ doublesSucSuc (suc n) m =
   ≡⟨ doublesSucn 4 n (doubleℕ m) ⟩ 
     sucn (doublesℕ n 4) (doublesℕ n (doubleℕ m))
   ∎
-  where
-   
 
+n+n≡2n : (n : ℕ) → sucn n n ≡ doubleℕ n
+n+n≡2n zero = refl
+n+n≡2n (suc n) = 
+    sucn (suc n) (suc n)
+  ≡⟨ sucnsuc (suc n) n ⟩
+    suc (sucn (suc n) n)
+  ≡⟨ refl ⟩ 
+   suc (suc (sucn n n))
+  ≡⟨ cong (λ z → suc (suc z)) (n+n≡2n n) ⟩ 
+   suc (suc (doubleℕ n))
+  ∎
 
 
   
