@@ -129,10 +129,11 @@ sucnN n = iter n sucN
 doubleN : (r : ℕ) → N r → N r
 doubleN zero (bn tt) = bn tt
 doubleN zero (xr d x) = sucN (sucN (doubleN zero x))
-doubleN (suc r) (bn x) with zero-n? x
-... | yes _ = bn x
-... | no _ = {!sucN (sucN (doubleN (suc r) x))!}
-doubleN (suc r) (xr x x₁) = {!sucN (sucN (doubleN (suc r)!}
+doubleN (suc r) (bn x) with zero-n? x | half? x
+... | yes _ | _     = bn x
+... | no _  | no _  = {!!}
+... | no _  | yes _ = {!!}
+doubleN (suc r) (xr x x₁) = sucN (sucN (doubleN (suc r) x₁))
 
 doublesN : (r : ℕ) → ℕ → N r → N r
 doublesN r zero m = m
@@ -251,8 +252,10 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
 ℕ→N (suc r) (suc n) = sucN (ℕ→N (suc r) n)
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
+ℕ→Nsuc r n = {!!}
 
 ℕ→Nsucn : (r : ℕ) (n m : ℕ) → ℕ→N r (sucn n m) ≡ sucnN n (ℕ→N r m)
+ℕ→Nsucn r n m = {!!}
 
 -- NℕNlemma is actually a pretty important fact;
 -- this is what allows the direct isomorphism of N and ℕ to go
@@ -310,7 +313,7 @@ N→ℕ→N (suc r) (xr (↓ , ds) x) =
      ℕ→N (suc r)
       (sucn (DirNum→ℕ {suc r} (↓ , ds))
        (doublesℕ (suc r) (N→ℕ (suc r) x)))
-   ≡⟨ {!!} ⟩
+   ≡⟨ ℕ→Nsucn (suc r) (DirNum→ℕ {suc r} (↓ , ds)) (doublesℕ (suc r) (N→ℕ (suc r) x)) ⟩
      sucnN (DirNum→ℕ {suc r} (↓ , ds))
       (ℕ→N (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x)))
    ≡⟨ cong (λ z → sucnN (DirNum→ℕ {suc r} (↓ , ds)) z) (H (suc r) (suc r) (N→ℕ (suc r) x)) ⟩
@@ -323,11 +326,39 @@ N→ℕ→N (suc r) (xr (↓ , ds) x) =
      xr (↓ , ds) x ∎
    where
      H : (r m n : ℕ) → ℕ→N r (doublesℕ m n) ≡ doublesN r m (ℕ→N r n)
+     H r m n = {!!}
      G : (r : ℕ) (d : DirNum r) (x : N r) → ¬ (r ≡ 0) → sucnN (DirNum→ℕ {r} d) (doublesN r r x) ≡ xr d x
      G zero d x 0≠0 = ⊥-elim (0≠0 refl)
-     G (suc r) d x r≠0 = {!!}
+     G (suc r) d (bn x) r≠0 = {!!}
+     G (suc r) d (xr x x₁) r≠0 = {!!}
+N→ℕ→N (suc r) (xr (↑ , ds) x) with max? ds
+... | no ds≠max = 
+          sucN
+          (ℕ→N (suc r)
+           (sucn (doubleℕ (DirNum→ℕ ds))
+            (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+        ≡⟨ sym (ℕ→Nsuc (suc r)
+                (sucn (doubleℕ (DirNum→ℕ ds)) (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+         ⟩ 
+           ℕ→N (suc r)
+           (suc (sucn (doubleℕ (DirNum→ℕ ds)) (doublesℕ r (doubleℕ (N→ℕ (suc r) x)))))
+        ≡⟨ refl ⟩ 
+           ℕ→N (suc r)
+           (suc (sucn (doubleℕ (DirNum→ℕ ds)) (doublesℕ (suc r) (N→ℕ (suc r) x))))
+        ≡⟨ cong (λ z → ℕ→N (suc r) z)
+                (sym (sucnsuc (doubleℕ (DirNum→ℕ ds)) (doublesℕ (suc r) (N→ℕ (suc r) x))))
+         ⟩ 
+           ℕ→N (suc r)
+           (sucn (doubleℕ (DirNum→ℕ ds)) (suc (doublesℕ (suc r) (N→ℕ (suc r) x))))
+         ≡⟨ ℕ→Nsucn (suc r) (doubleℕ (DirNum→ℕ ds)) (suc (doublesℕ (suc r) (N→ℕ (suc r) x))) ⟩ 
+           sucnN (doubleℕ (DirNum→ℕ ds)) (ℕ→N (suc r) (suc (doublesℕ (suc r) (N→ℕ (suc r) x))))
+         ≡⟨ cong (λ z → sucnN (doubleℕ (DirNum→ℕ ds)) z)
+                  (ℕ→Nsuc (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x)))
+          ⟩ 
+           sucnN (doubleℕ (DirNum→ℕ ds)) (sucN (ℕ→N (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x))))
+         ≡⟨ {!!} ⟩ {!!}
 
-N→ℕ→N (suc r) (xr (↑ , ds) x) = {!!}
+... | yes ds≡max = {!!}
 
 ℕ→N→ℕ : (r : ℕ) → (n : ℕ) → N→ℕ r (ℕ→N r n) ≡ n
 ℕ→N→ℕ zero zero = refl

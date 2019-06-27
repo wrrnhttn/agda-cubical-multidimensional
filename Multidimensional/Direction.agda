@@ -251,6 +251,8 @@ max-n : (n : ℕ) → DirNum n
 max-n zero = tt
 max-n (suc n) = (↑ , max-n n)
 
+half-n : (n : ℕ) → DirNum n
+
 max→ℕ : (r : ℕ) → DirNum→ℕ (max-n r) ≡ predℕ (doublesℕ r 1)
 max→ℕ zero = refl
 max→ℕ (suc r) = 
