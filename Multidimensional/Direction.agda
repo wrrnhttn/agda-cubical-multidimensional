@@ -6,6 +6,7 @@ open import Cubical.Data.Empty
 open import Cubical.Data.Nat
 open import Cubical.Data.Unit
 open import Cubical.Data.Prod
+open import Cubical.Data.Bool
 
 module Direction where
 
@@ -171,11 +172,12 @@ DirNum : ℕ → Type₀
 DirNum zero = Unit
 DirNum (suc n) = Dir × (DirNum n)
 
-sucDoubleDirNum : (r : ℕ) → DirNum r → DirNum (suc r)
-sucDoubleDirNum r x = (↑ , x)
+sucDoubleDirNum+ : (r : ℕ) → DirNum r → DirNum (suc r)
+sucDoubleDirNum+ r x = (↑ , x)
 
-doubleDirNum : (r : ℕ) → DirNum r → DirNum (suc r)
-doubleDirNum r x = (↓ , x)
+-- bad name, since this is doubling "to" suc r
+doubleDirNum+ : (r : ℕ) → DirNum r → DirNum (suc r)
+doubleDirNum+ r x = (↓ , x)
 
 
 DirNum→ℕ : ∀ {n} → DirNum n → ℕ
@@ -184,7 +186,7 @@ DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d)
 DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
 
 double-lemma : ∀ {r} → (d : DirNum r) →
-                doubleℕ (DirNum→ℕ d) ≡ DirNum→ℕ (doubleDirNum r d)
+                doubleℕ (DirNum→ℕ d) ≡ DirNum→ℕ (doubleDirNum+ r d)
 double-lemma {r} d = refl
 
 ¬↓,d≡↑,d′ : ∀ {n} → ∀ (d d′ : DirNum n) → ¬ (↓ , d) ≡ (↑ , d′)
@@ -242,6 +244,29 @@ zero-n≡0 {suc r} =
    0
   ∎
 
+-- x is doubleable as a DirNum precisely when x's most significant bit is 0
+-- this should return a Dec
+doubleable-n? : {n : ℕ} → (x : DirNum n) → Bool
+doubleable-n? {zero} tt = false
+doubleable-n? {suc n} (x , x₁) with zero-n? x₁
+... | yes _ = true
+... | no _ = doubleable-n? x₁
+
+dropMost : {r : ℕ} → DirNum (suc r) → DirNum r
+dropMost {zero} d = tt
+dropMost {suc zero} (x , (x₁ , x₂)) = (x₁ , x₂)
+dropMost {suc (suc r)} (x , x₁) = (x , dropMost x₁)
+
+-- need to prove property about doubleable
+--doubleDirNum : (r : ℕ) (d : DirNum r) → doubleable-n? {r} d ≡ true → DirNum r
+-- bad:
+doubleDirNum : (r : ℕ) (d : DirNum r) → DirNum r
+doubleDirNum zero d  = tt
+doubleDirNum (suc r) d  = doubleDirNum+ r (dropMost {r} d)
+-- doubleDirNum zero d doubleable = ⊥-elim (false≢true doubleable)
+-- doubleDirNum (suc r) d doubleable = doubleDirNum+ r (dropMost {r} d)
+
+
 one-n : (n : ℕ) → DirNum n
 one-n zero = tt
 one-n (suc n) = (↑ , zero-n n)
@@ -251,7 +276,7 @@ max-n : (n : ℕ) → DirNum n
 max-n zero = tt
 max-n (suc n) = (↑ , max-n n)
 
-half-n : (n : ℕ) → DirNum n
+--half-n : (n : ℕ) → DirNum n
 
 max→ℕ : (r : ℕ) → DirNum→ℕ (max-n r) ≡ predℕ (doublesℕ r 1)
 max→ℕ zero = refl
@@ -335,18 +360,18 @@ embed-next (suc r) (d , ds) with zero-n? ds
 
 -- TODO: rename?
 nextsuc-lemma : (r : ℕ) (x : DirNum r) →
-         ¬ ((sucDoubleDirNum r x) ≡ max-n (suc r)) → ¬ (x ≡ max-n r)
+         ¬ ((sucDoubleDirNum+ r x) ≡ max-n (suc r)) → ¬ (x ≡ max-n r)
 nextsuc-lemma zero tt ¬H = ⊥-elim (¬H refl)
 nextsuc-lemma (suc r) (↓ , x) ¬H = ¬↓,d≡↑,d′ x (max-n r)
 nextsuc-lemma (suc r) (↑ , x) ¬H =
   λ h → ¬H (H (dropLeast≡ x (max-n r) ↑ h)) --⊥-elim (¬H H)
   where
     H : (x ≡ max-n r) →
-         sucDoubleDirNum (suc r) (↑ , x) ≡ (↑ , (↑ , max-n r))
+         sucDoubleDirNum+ (suc r) (↑ , x) ≡ (↑ , (↑ , max-n r))
     H x≡maxnr = 
-        sucDoubleDirNum (suc r) (↑ , x)
-      ≡⟨ cong (λ y → sucDoubleDirNum (suc r) (↑ , y)) x≡maxnr ⟩
-        sucDoubleDirNum (suc r) (↑ , max-n r)
+        sucDoubleDirNum+ (suc r) (↑ , x)
+      ≡⟨ cong (λ y → sucDoubleDirNum+ (suc r) (↑ , y)) x≡maxnr ⟩
+        sucDoubleDirNum+ (suc r) (↑ , max-n r)
       ≡⟨ refl ⟩ 
         (↑ , (↑ , max-n r))
       ∎

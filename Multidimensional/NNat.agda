@@ -10,6 +10,7 @@ open import Cubical.Data.Empty
 open import Cubical.Data.Unit
 open import Cubical.Data.Prod
 open import Cubical.Data.BinNat
+open import Cubical.Data.Bool
 open import Cubical.Relation.Nullary
 open import Direction
 
@@ -97,6 +98,34 @@ NatImplBNat : NatImpl BNat
 z NatImplBNat = b0
 s NatImplBNat = sucBNat
 
+--
+
+data np (r : ℕ) : Type₀ where
+  bp : DirNum r → np r
+  zp : ∀ (d d′ : DirNum r) → bp d ≡ bp d′
+  xp : DirNum r → np r → np r
+
+sucnp : ∀ {r} → np r → np r
+sucnp {zero} (bp tt) = xp tt (bp tt)
+sucnp {zero} (zp tt tt i) = xp tt (bp tt)
+sucnp {zero} (xp tt n) = xp tt (sucnp n)
+sucnp {suc r} (bp d) = xp (one-n (suc r)) (bp d)
+sucnp {suc r} (zp d d′ i) = xp (one-n (suc r)) (zp d d′ i)
+sucnp {suc r} (xp d n) with max? d
+... | no _ = xp (next d) n 
+... | yes _ = xp (zero-n (suc r)) (sucnp n)
+
+np→ℕ : (r : ℕ) (x : np r) → ℕ
+np→ℕ r (bp x) = 0
+np→ℕ r (zp d d′ i) = 0
+np→ℕ zero (xp x x₁) = suc (np→ℕ zero x₁)
+np→ℕ (suc r) (xp x x₁) = sucn (DirNum→ℕ x) (doublesℕ (suc r) (np→ℕ (suc r) x₁))
+
+ℕ→np : (r : ℕ) → (n : ℕ) → np r
+ℕ→np r zero = bp (zero-n r)
+ℕ→np zero (suc n) = xp tt (ℕ→np zero n)
+ℕ→np (suc r) (suc n) = sucnp (ℕ→np (suc r) n)
+
 
 
 ---- generalize bnat:
@@ -129,10 +158,12 @@ sucnN n = iter n sucN
 doubleN : (r : ℕ) → N r → N r
 doubleN zero (bn tt) = bn tt
 doubleN zero (xr d x) = sucN (sucN (doubleN zero x))
-doubleN (suc r) (bn x) with zero-n? x | half? x
-... | yes _ | _     = bn x
-... | no _  | no _  = {!!}
-... | no _  | yes _ = {!!}
+doubleN (suc r) (bn x) with zero-n? x
+... | yes _    = bn x
+            -- bad:
+... | no _ = caseBool (bn (doubleDirNum (suc r) x)) (xr (zero-n (suc r)) (bn x)) (doubleable-n? x)
+-- ... | no _  | doubleable  = {!bn (doubleDirNum x)!}
+-- ... | no _  | notdoubleable = xr (zero-n (suc r)) (bn x)
 doubleN (suc r) (xr x x₁) = sucN (sucN (doubleN (suc r) x₁))
 
 doublesN : (r : ℕ) → ℕ → N r → N r
@@ -271,14 +302,6 @@ NℕNlemma : (r : ℕ) (d : DirNum r) → ℕ→N r (DirNum→ℕ d) ≡ bn d
 NℕNlemma zero tt = refl
 NℕNlemma (suc r) (↓ , ds) = 
     ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
-  ≡⟨ cong (ℕ→N (suc r)) (double-lemma ds) ⟩ 
-    ℕ→N (suc r) (DirNum→ℕ {suc r} (↓ , ds))
-  ≡⟨ refl ⟩ 
-    ℕ→N (suc r) (doublesℕ (suc zero) (DirNum→ℕ ds))
-  ≡⟨ refl ⟩ 
-    ℕ→N (suc r) (doublesℕ zero (doubleℕ (DirNum→ℕ ds)))
-  ≡⟨ refl ⟩ 
-    ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
   ≡⟨ {!!} ⟩ {!!}
 NℕNlemma (suc r) (↑ , ds) = {!!}
 
@@ -354,7 +377,10 @@ N→ℕ→N (suc r) (xr (↑ , ds) x) with max? ds
            sucnN (doubleℕ (DirNum→ℕ ds)) (ℕ→N (suc r) (suc (doublesℕ (suc r) (N→ℕ (suc r) x))))
          ≡⟨ cong (λ z → sucnN (doubleℕ (DirNum→ℕ ds)) z)
                   (ℕ→Nsuc (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x)))
-          ⟩ 
+          ⟩
+           --   (2^(r+1)*x + 1) + 2*ds
+           -- = 2*(2^r*x + ds) + 1
+           -- = 2*(
            sucnN (doubleℕ (DirNum→ℕ ds)) (sucN (ℕ→N (suc r) (doublesℕ (suc r) (N→ℕ (suc r) x))))
          ≡⟨ {!!} ⟩ {!!}
 
