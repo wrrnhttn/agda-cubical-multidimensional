@@ -12,6 +12,7 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Data.Nat
 open import Cubical.Data.Prod
 open import Cubical.Data.Empty
+open import Cubical.Data.Unit
 
 open import Cubical.Relation.Nullary
 
@@ -116,10 +117,27 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
           ≡⟨ {!!} ⟩ {!!}
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
-ℕ→Nsuc r n = {!!}
+ℕ→Nsuc zero zero = refl
+ℕ→Nsuc zero (suc n) with is-zero? n
+... | yes n=0 = 
+        xr tt (xr tt (ℕ→N 0 n))      ≡⟨ cong (λ z → xr tt (xr tt (ℕ→N 0 z)))
+                                             n=0 ⟩
+        xr tt (sucN (ℕ→N zero zero)) ≡⟨ cong (λ z → xr tt (sucN (ℕ→N zero z)))
+                                             (sym n=0) ⟩
+        xr tt (sucN (ℕ→N zero n))    ∎
+... | no n≠0 = 
+        xr tt (xr tt (ℕ→N 0 n))   ≡⟨ refl ⟩ 
+        xr tt (ℕ→N zero (suc n)) ≡⟨ cong (λ z → xr tt z) (ℕ→Nsuc zero n) ⟩ 
+        xr tt (sucN (ℕ→N 0 n))   ∎
+ℕ→Nsuc (suc r) n = refl
 
 ℕ→Nsucn : (r : ℕ) (n m : ℕ) → ℕ→N r (sucn n m) ≡ sucnN n (ℕ→N r m)
-ℕ→Nsucn r n m = {!!}
+ℕ→Nsucn zero zero m = refl
+ℕ→Nsucn zero (suc n) zero = {!!}
+ℕ→Nsucn zero (suc n) (suc m) = {!!}
+ℕ→Nsucn (suc r) zero m = refl
+ℕ→Nsucn (suc r) (suc n) zero = {!!}
+ℕ→Nsucn (suc r) (suc n) (suc m) = {!!}
 
 NℕNlemma : (r : ℕ) (d : DirNum r) → ℕ→N r (DirNum→ℕ d) ≡ bn d
 NℕNlemma zero tt = refl
