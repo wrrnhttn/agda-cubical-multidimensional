@@ -100,3 +100,16 @@ n+n≡2n (suc n) =
   ≡⟨ cong (λ z → suc (suc z)) (n+n≡2n n) ⟩ 
    suc (suc (doubleℕ n))
   ∎
+
+is-zero? : (n : ℕ) → Dec (n ≡ 0)
+is-zero? zero = yes refl
+is-zero? (suc n) = no snotz
+
+--open import Cubical.Foundations.Logic
+-- open import Cubical.Relation.Nullary
+
+-- nonzero-is-suc : (n : ℕ) → ¬ (n ≡ 0) → ∃[ m ] (n ≡ suc m)
+-- nonzero-is-suc n n≠0 = ?
+nonzero-is-suc : (n : ℕ) → ¬ (n ≡ 0) → Σ[ m ∈ ℕ ] (n ≡ suc m)
+nonzero-is-suc zero n≠0 = ⊥-elim (n≠0 refl)
+nonzero-is-suc (suc n) n≠0 = (n , refl)
