@@ -110,7 +110,7 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
         H (suc n) m = 
             sucn (doublesℕ n 4) m ≡⟨ cong (λ z → sucn z m) (doublesSucSuc n 2) ⟩ 
             sucn (sucn (doublesℕ (suc n) 1) (doublesℕ n 2)) m ≡⟨ refl ⟩ 
-            sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m ≡⟨ {!!} ⟩ 
+            sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m ≡⟨ cong (λ z → sucn z m) (n+n≡2n (doublesℕ n 2)) ⟩ 
             sucn (doubleℕ (doublesℕ n 2)) m ≡⟨ {!!} ⟩
             {!!} ≡⟨ {!!} ⟩
             suc (suc (predℕ (predℕ (sucn (doubleℕ (doublesℕ n 2)) m)))) ≡⟨ {!!} ⟩
