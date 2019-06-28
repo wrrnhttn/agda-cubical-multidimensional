@@ -18,6 +18,11 @@ DirNum : ℕ → Type₀
 DirNum zero = Unit
 DirNum (suc n) = Dir × (DirNum n)
 
+DirNum→ℕ : ∀ {n} → DirNum n → ℕ
+DirNum→ℕ {zero} tt = zero
+DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d)
+DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
+
 -- give the next numeral, cycling back to 0
 -- in case of 2ⁿ - 1
 next : ∀ {n} → DirNum n → DirNum n
