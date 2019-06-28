@@ -57,6 +57,10 @@ sucDoubleDirNum+ r x = (↑ , x)
 doubleDirNum+ : (r : ℕ) → DirNum r → DirNum (suc r)
 doubleDirNum+ r x = (↓ , x)
 
+dropLeast : {r : ℕ} → DirNum (suc r) → DirNum r
+dropLeast {zero} d = tt
+dropLeast {suc r} (x , x₁) = x₁
+
 dropMost : {r : ℕ} → DirNum (suc r) → DirNum r
 dropMost {zero} d = tt
 dropMost {suc zero} (x , (x₁ , x₂)) = (x₁ , x₂)
