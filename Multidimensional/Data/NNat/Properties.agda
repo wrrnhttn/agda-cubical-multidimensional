@@ -104,17 +104,22 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
            (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))) -- (2^r*2x + (2*(2^r - 1))) + 2 = 2^(r+1)x + 2^(r+1)
       ∎
       where
+        -- this lemma is silly, should prove some better helper lemmas
         H : (n m : ℕ) → sucn (doublesℕ (suc n) 1) m ≡ suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 1))) m))
         H zero m = refl
         H (suc n) m = 
-            sucn (doublesℕ n 4) m
-          ≡⟨ cong (λ z → sucn z m) (doublesSucSuc n 2) ⟩ 
-            sucn (sucn (doublesℕ (suc n) 1) (doublesℕ n 2)) m
-          ≡⟨ refl ⟩ 
-            sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m
-          ≡⟨ {!!} ⟩ 
-            sucn (doubleℕ (doublesℕ n 2)) m
-          ≡⟨ {!!} ⟩ {!!}
+            sucn (doublesℕ n 4) m ≡⟨ cong (λ z → sucn z m) (doublesSucSuc n 2) ⟩ 
+            sucn (sucn (doublesℕ (suc n) 1) (doublesℕ n 2)) m ≡⟨ refl ⟩ 
+            sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m ≡⟨ {!!} ⟩ 
+            sucn (doubleℕ (doublesℕ n 2)) m ≡⟨ {!!} ⟩
+            {!!} ≡⟨ {!!} ⟩
+            suc (suc (predℕ (predℕ (sucn (doubleℕ (doublesℕ n 2)) m)))) ≡⟨ {!!} ⟩
+            suc
+             (suc
+              (sucn (predℕ (predℕ (doubleℕ (doublesℕ n 2))))
+               m))                                       ≡⟨ cong (λ z → suc (suc (sucn z m)))
+                                                            (sym (doublePred (doublesℕ n 2))) ⟩
+            suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 2))) m)) ∎
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
 ℕ→Nsuc zero zero = refl
