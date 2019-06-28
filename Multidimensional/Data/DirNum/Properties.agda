@@ -3,6 +3,7 @@ module Multidimensional.Data.DirNum.Properties where
 
 open import Cubical.Foundations.Prelude
 
+open import Cubical.Data.Empty
 open import Cubical.Data.Prod
 open import Cubical.Data.Bool
 open import Cubical.Data.Nat
@@ -94,3 +95,71 @@ max→ℕ (suc r) =
           0 ∎
          )))
 
+max? : ∀ {n} → (x : DirNum n) → Dec (x ≡ max-n n)
+max? {zero} tt = yes refl
+max? {suc n} (↓ , ds) = no ((¬↓,d≡↑,d′ ds (max-n n)))
+max? {suc n} (↑ , ds) with max? ds
+... | yes ds≡max-n = yes (
+          (↑ , ds)
+        ≡⟨ cong (λ x → (↑ , x)) ds≡max-n ⟩ 
+          (↑ , max-n n)
+        ∎
+      )
+... | no ¬ds≡max-n = no (λ d,ds≡d,max-n →
+                            ¬ds≡max-n ((dropLeast≡ ds (max-n n) ↑ d,ds≡d,max-n)))
+
+maxn+1≡↑maxn : ∀ n → max-n (suc n) ≡ (↑ , (max-n n))
+maxn+1≡↑maxn n = refl
+
+maxr≡pred2ʳ : (r : ℕ) (d : DirNum r) →
+           d ≡ max-n r → DirNum→ℕ d ≡ predℕ (doublesℕ r (suc zero))
+maxr≡pred2ʳ zero d d≡max = refl
+maxr≡pred2ʳ (suc r) (↓ , ds) d≡max = ⊥-elim ((¬↓,d≡↑,d′ ds (max-n r)) d≡max) 
+maxr≡pred2ʳ (suc r) (↑ , ds) d≡max = 
+     suc (doubleℕ (DirNum→ℕ ds))
+   ≡⟨ cong (λ x → suc (doubleℕ x)) (maxr≡pred2ʳ r ds ds≡max) ⟩
+     suc (doubleℕ (predℕ (doublesℕ r (suc zero)))) -- 2*(2^r - 1) + 1 = 2^r+1 - 1
+   ≡⟨ cong suc (doublePred (doublesℕ r (suc zero))) ⟩ 
+     suc (predℕ (predℕ (doubleℕ (doublesℕ r (suc zero)))))
+   ≡⟨ sucPred (predℕ (doubleℕ (doublesℕ r (suc zero)))) (
+              (predDoublePos (doublesℕ r (suc zero)) ((doublesPos r 1 snotz)))) ⟩
+     predℕ (doubleℕ (doublesℕ r (suc zero)))
+   ≡⟨ cong predℕ (doubleDoubles r (suc zero)) ⟩
+     predℕ (doublesℕ (suc r) 1)
+   ≡⟨ refl ⟩
+     predℕ (doublesℕ r 2) -- 2^r*2 - 1 = 2^(r+1) - 1
+   ∎
+  where
+    ds≡max : ds ≡ max-n r
+    ds≡max = dropLeast≡ ds (max-n r) ↑ d≡max
+
+-- TODO: rename?
+nextsuc-lemma : (r : ℕ) (x : DirNum r) →
+         ¬ ((sucDoubleDirNum+ r x) ≡ max-n (suc r)) → ¬ (x ≡ max-n r)
+nextsuc-lemma zero tt ¬H = ⊥-elim (¬H refl)
+nextsuc-lemma (suc r) (↓ , x) ¬H = ¬↓,d≡↑,d′ x (max-n r)
+nextsuc-lemma (suc r) (↑ , x) ¬H =
+  λ h → ¬H (H (dropLeast≡ x (max-n r) ↑ h)) --⊥-elim (¬H H)
+  where
+    H : (x ≡ max-n r) →
+         sucDoubleDirNum+ (suc r) (↑ , x) ≡ (↑ , (↑ , max-n r))
+    H x≡maxnr = 
+        sucDoubleDirNum+ (suc r) (↑ , x)
+      ≡⟨ cong (λ y → sucDoubleDirNum+ (suc r) (↑ , y)) x≡maxnr ⟩
+        sucDoubleDirNum+ (suc r) (↑ , max-n r)
+      ≡⟨ refl ⟩ 
+        (↑ , (↑ , max-n r))
+      ∎
+
+
+next≡suc : (r : ℕ) (x : DirNum r) →
+            ¬ (x ≡ max-n r) → DirNum→ℕ (next x) ≡ suc (DirNum→ℕ x)
+next≡suc zero tt ¬x≡maxnr = ⊥-elim (¬x≡maxnr refl)
+next≡suc (suc r) (↓ , x) ¬x≡maxnr = refl
+next≡suc (suc r) (↑ , x) ¬x≡maxnr = 
+    doubleℕ (DirNum→ℕ (next x))
+  ≡⟨ cong doubleℕ (next≡suc r x (nextsuc-lemma r x ¬x≡maxnr)) ⟩
+    doubleℕ (suc (DirNum→ℕ x))
+  ≡⟨ refl ⟩ 
+    suc (suc (doubleℕ (DirNum→ℕ x)))
+  ∎

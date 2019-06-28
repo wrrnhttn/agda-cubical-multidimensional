@@ -9,6 +9,7 @@ open import Cubical.Data.Nat
 
 open import Multidimensional.Data.Dir
 
+
 -- Dependent "directional numerals":
 -- for natural n, obtain 2ⁿ "numerals".
 -- This is basically a little-endian binary notation.
