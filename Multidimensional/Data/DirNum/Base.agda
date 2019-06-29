@@ -21,7 +21,7 @@ DirNum (suc n) = Dir × (DirNum n)
 
 DirNum→ℕ : ∀ {n} → DirNum n → ℕ
 DirNum→ℕ {zero} tt = zero
-DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d)
+DirNum→ℕ {suc n} (↓ , d) = doublesℕ (suc zero) (DirNum→ℕ d) -- why not doubleℕ???!!!
 DirNum→ℕ {suc n} (↑ , d) = suc (doublesℕ (suc zero) (DirNum→ℕ d))
 
 -- give the next numeral, cycling back to 0

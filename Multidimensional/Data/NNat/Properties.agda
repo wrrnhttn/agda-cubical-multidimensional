@@ -22,6 +22,11 @@ open import Multidimensional.Data.Dir
 open import Multidimensional.Data.DirNum
 open import Multidimensional.Data.NNat.Base
 
+
+sucN0lemma : (n : N zero) → xr tt n ≡ sucN n
+sucN0lemma (bn x) = refl
+sucN0lemma (xr x n) = cong (xr tt) (sucN0lemma n)
+
 N→ℕsucN : (r : ℕ) (x : N r) → N→ℕ r (sucN x) ≡ suc (N→ℕ r x)
 N→ℕsucN zero (bn tt) = refl
 N→ℕsucN zero (xr tt x) = 
@@ -162,11 +167,27 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
 ℕ→Nsucn (suc r) (suc n) zero = {!!}
 ℕ→Nsucn (suc r) (suc n) (suc m) = {!!}
 
+ℕ→Ndouble : (r : ℕ) (n : ℕ) → ℕ→N r (doubleℕ n) ≡ doubleN r (ℕ→N r n)
+ℕ→Ndouble zero zero = refl
+ℕ→Ndouble zero (suc n) =
+  xr tt (xr tt (ℕ→N zero (doubleℕ n))) ≡⟨ cong (λ z → xr tt (xr tt z)) (ℕ→Ndouble zero n) ⟩
+  xr tt (xr tt (doubleN zero (ℕ→N zero n))) ≡⟨ sucN0lemma (xr tt (doubleN zero (ℕ→N zero n)))  ⟩ 
+  xr tt (sucN (doubleN zero (ℕ→N zero n))) ≡⟨ sucN0lemma (sucN (doubleN zero (ℕ→N zero n))) ⟩ 
+  sucN (sucN (doubleN zero (ℕ→N zero n))) ∎
+ℕ→Ndouble (suc r) zero = {!!}
+ℕ→Ndouble (suc r) (suc n) = 
+  sucN (sucN (ℕ→N (suc r) (doubleℕ n))) ≡⟨ cong (λ z → sucN (sucN z)) (ℕ→Ndouble (suc r) n) ⟩ 
+  sucN (sucN (doubleN (suc r) (ℕ→N (suc r) n))) ≡⟨ {!!} ⟩ {!!}
+
+
 NℕNlemma : (r : ℕ) (d : DirNum r) → ℕ→N r (DirNum→ℕ d) ≡ bn d
 NℕNlemma zero tt = refl
-NℕNlemma (suc r) (↓ , ds) = 
-    ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds))
-  ≡⟨ {!!} ⟩ {!!}
+NℕNlemma (suc r) (↓ , ds) with zero-n? ds
+... | yes _ = {!!}
+... | no _ = {!!}
+    -- ℕ→N (suc r) (doubleℕ (DirNum→ℕ ds)) ≡⟨ ℕ→Ndouble (suc r) (DirNum→ℕ ds) ⟩
+    -- doubleN (suc r) (ℕ→N (suc r) (DirNum→ℕ ds)) ≡⟨ {!!} ⟩ {!
+    -- doubleN (suc r) (sucN (ℕ→N (suc r) ≡⟨ ? ⟩ ?!}
 NℕNlemma (suc r) (↑ , ds) = {!!}
 
 N→ℕ→N : (r : ℕ) → (x : N r) → ℕ→N r (N→ℕ r x) ≡ x
