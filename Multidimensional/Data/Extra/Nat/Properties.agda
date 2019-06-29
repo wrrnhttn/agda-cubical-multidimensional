@@ -125,3 +125,34 @@ is-zero? (suc n) = no snotz
 nonzero-is-suc : (n : ℕ) → ¬ (n ≡ 0) → Σ[ m ∈ ℕ ] (n ≡ suc m)
 nonzero-is-suc zero n≠0 = ⊥-elim (n≠0 refl)
 nonzero-is-suc (suc n) n≠0 = (n , refl)
+
+1<sucsuc : (n : ℕ) → 1 < suc (suc n)
+1<sucsuc zero = 0 , refl
+1<sucsuc (suc n) = suc n , H n
+  where
+    H : (n : ℕ) → suc (n + 2) ≡ suc (suc (suc n))
+    H zero = refl
+    H (suc n) = cong suc (H n)
+
+sucn≡+n : (m n : ℕ) → sucn n m ≡ m + n
+sucn≡+n m zero = sym (+-zero m)
+sucn≡+n m (suc n) =
+  sucn (suc n) m ≡⟨ refl ⟩
+  suc (sucn n m) ≡⟨ cong suc (sucn≡+n m n) ⟩
+  suc (m + n) ≡⟨ cong suc (+-comm m n) ⟩
+  suc n + m ≡⟨ +-comm (suc n) m ⟩ 
+  m + suc n ∎
+
+1<sucnDouble : (n m : ℕ) → ¬ (n ≡ 0) → 1 < sucn (doubleℕ n) m
+1<sucnDouble zero m 0≠0 = ⊥-elim (0≠0 refl)
+1<sucnDouble (suc n) m _ = sucn (doubleℕ n) m , H n m
+  where
+    H : (n m : ℕ) → sucn (doubleℕ n) m + 2 ≡ sucn (suc (suc (doubleℕ n))) m
+    H zero m = 
+      m + 2 ≡⟨ sym (sucn≡+n m 2) ⟩ 
+      sucn 2 m ∎
+    H (suc n) m = 
+      suc (suc (sucn (doubleℕ n) m + 2)) ≡⟨ cong (λ z → suc (suc z)) (H n m) ⟩ 
+      suc (suc (sucn (suc (suc (doubleℕ n))) m)) ∎
+
+--sucnsuc : (n m : ℕ) → sucn n (suc m) ≡ suc (sucn n m)

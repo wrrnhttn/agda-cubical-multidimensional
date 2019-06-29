@@ -112,8 +112,8 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
         G' zero = snotz
         G' (suc n) = doublePos (doublesℕ n 4) (doublesPos n 4 snotz)
         G : (n m : ℕ) → 1 < sucn (doubleℕ (doublesℕ n 2)) m
-        G zero m = {!!}
-        G (suc n) m = {!!}
+        G zero m = 1<sucsuc (suc (suc m))
+        G (suc n) m = 1<sucnDouble (doublesℕ n 4) m (doublesPos n 4 snotz)
         -- this lemma is silly, should prove some better helper lemmas
         H : (n m : ℕ) → sucn (doublesℕ (suc n) 1) m ≡ suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 1))) m))
         H zero m = refl
