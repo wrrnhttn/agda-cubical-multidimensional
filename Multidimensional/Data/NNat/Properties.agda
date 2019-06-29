@@ -10,6 +10,7 @@ open import Cubical.Foundations.Univalence
 open import Cubical.Foundations.Isomorphism
 
 open import Cubical.Data.Nat
+open import Cubical.Data.Nat.Order
 open import Cubical.Data.Prod
 open import Cubical.Data.Empty
 open import Cubical.Data.Unit
@@ -104,6 +105,15 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
            (doublesℕ r (doubleℕ (N→ℕ (suc r) x))))) -- (2^r*2x + (2*(2^r - 1))) + 2 = 2^(r+1)x + 2^(r+1)
       ∎
       where
+        G'' : (n : ℕ) → ¬ (predℕ (doubleℕ (doublesℕ n 2))) ≡ 0
+        G'' zero = snotz
+        G'' (suc n) = predDoublePos (doublesℕ n 4) (doublesPos n 4 snotz) 
+        G' : (n : ℕ) → ¬ ((doubleℕ (doublesℕ n 2)) ≡ 0)
+        G' zero = snotz
+        G' (suc n) = doublePos (doublesℕ n 4) (doublesPos n 4 snotz)
+        G : (n m : ℕ) → 1 < sucn (doubleℕ (doublesℕ n 2)) m
+        G zero m = {!!}
+        G (suc n) m = {!!}
         -- this lemma is silly, should prove some better helper lemmas
         H : (n m : ℕ) → sucn (doublesℕ (suc n) 1) m ≡ suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 1))) m))
         H zero m = refl
@@ -111,15 +121,23 @@ N→ℕsucN (suc r) (xr (↑ , d) x) with max? d
             sucn (doublesℕ n 4) m ≡⟨ cong (λ z → sucn z m) (doublesSucSuc n 2) ⟩ 
             sucn (sucn (doublesℕ (suc n) 1) (doublesℕ n 2)) m ≡⟨ refl ⟩ 
             sucn (sucn (doublesℕ n 2) (doublesℕ  n 2)) m ≡⟨ cong (λ z → sucn z m) (n+n≡2n (doublesℕ n 2)) ⟩ 
-            sucn (doubleℕ (doublesℕ n 2)) m ≡⟨ {!!} ⟩
-            {!!} ≡⟨ {!!} ⟩
-            suc (suc (predℕ (predℕ (sucn (doubleℕ (doublesℕ n 2)) m)))) ≡⟨ {!!} ⟩
+            sucn (doubleℕ (doublesℕ n 2)) m ≡⟨ sym (sucSucPredPred (sucn (doubleℕ (doublesℕ n 2)) m) (G n m)) ⟩
+            suc (suc (predℕ
+             (predℕ (sucn (doubleℕ (doublesℕ n 2)) m)))) ≡⟨ cong (λ z → suc (suc (predℕ z)))
+                                                            (predSucn≡SucnPred
+                                                            (doubleℕ (doublesℕ n 2)) m (G' n)) ⟩
+            suc (suc
+            (predℕ (sucn (predℕ (doubleℕ (doublesℕ n 2))) m))) ≡⟨ cong (λ z → suc (suc z))
+                                                                  (predSucn≡SucnPred
+                                                                  (predℕ (doubleℕ
+                                                                         (doublesℕ n 2))) m (G'' n)) ⟩
             suc
              (suc
               (sucn (predℕ (predℕ (doubleℕ (doublesℕ n 2))))
                m))                                       ≡⟨ cong (λ z → suc (suc (sucn z m)))
                                                             (sym (doublePred (doublesℕ n 2))) ⟩
             suc (suc (sucn (doubleℕ (predℕ (doublesℕ n 2))) m)) ∎
+              
 
 ℕ→Nsuc : (r : ℕ) (n : ℕ) → ℕ→N r (suc n) ≡ sucN (ℕ→N r n)
 ℕ→Nsuc zero zero = refl

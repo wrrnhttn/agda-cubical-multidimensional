@@ -6,6 +6,7 @@ open import Cubical.Core.Everything
 open import Cubical.Foundations.Prelude
 
 open import Cubical.Data.Nat
+open import Cubical.Data.Nat.Order
 open import Cubical.Data.Empty
 
 open import Cubical.Relation.Nullary
@@ -26,6 +27,17 @@ doublePred (suc n) = refl
 sucPred : (n : ℕ) → ¬ (n ≡ zero) → suc (predℕ n) ≡ n
 sucPred zero 0≠0 = ⊥-elim (0≠0 refl)
 sucPred (suc n) sucn≠0 = refl
+
+--this needs n > 1
+-- not a necessary lemma, but it speeds up N→ℕsucN by a few steps
+sucSucPredPred : (n : ℕ) → 1 < n → suc (suc (predℕ (predℕ n))) ≡ n
+sucSucPredPred zero 1<0 = ⊥-elim (¬-<-zero 1<0)
+sucSucPredPred (suc zero) 1<n = ⊥-elim (¬m<m 1<n)
+sucSucPredPred (suc (suc n)) 1<n = refl
+
+predSucn≡SucnPred : (n m : ℕ) → ¬ (n ≡ 0) → predℕ (sucn n m) ≡ sucn (predℕ n) m
+predSucn≡SucnPred zero m n≠0 = ⊥-elim (n≠0 refl)
+predSucn≡SucnPred (suc n) m n≠0 = refl
 
 doubleDoubles : (n m : ℕ) → doubleℕ (doublesℕ n m) ≡ doublesℕ (suc n) m
 doubleDoubles zero m = refl
