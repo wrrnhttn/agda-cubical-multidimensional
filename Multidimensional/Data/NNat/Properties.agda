@@ -236,7 +236,7 @@ N→ℕ→N (suc r) (xr (↓ , ds) x) =
      H : (r m n : ℕ) → ℕ→N r (doublesℕ m n) ≡ doublesN r m (ℕ→N r n)
      H r m n = {!!}
      G : (r : ℕ) (d : DirNum r) (x : N r) → ¬ (r ≡ 0) → sucnN (DirNum→ℕ {r} d) (doublesN r r x) ≡ xr d x
-     G zero d x 0≠0 = ⊥-elim (0≠0 refl)
+     G zero d x 0≠0 = rec (0≠0 refl)
      G (suc r) d (bn x) r≠0 = {!!}
      G (suc r) d (xr x x₁) r≠0 = {!!}
 N→ℕ→N (suc r) (xr (↑ , ds) x) with max? ds
