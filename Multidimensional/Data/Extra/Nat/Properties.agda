@@ -25,18 +25,18 @@ doublePred zero = refl
 doublePred (suc n) = refl
 
 sucPred : (n : ℕ) → ¬ (n ≡ zero) → suc (predℕ n) ≡ n
-sucPred zero 0≠0 = ⊥-elim (0≠0 refl)
+sucPred zero 0≠0 = rec (0≠0 refl)
 sucPred (suc n) sucn≠0 = refl
 
 --this needs n > 1
 -- not a necessary lemma, but it speeds up N→ℕsucN by a few steps
 sucSucPredPred : (n : ℕ) → 1 < n → suc (suc (predℕ (predℕ n))) ≡ n
-sucSucPredPred zero 1<0 = ⊥-elim (¬-<-zero 1<0)
-sucSucPredPred (suc zero) 1<n = ⊥-elim (¬m<m 1<n)
+sucSucPredPred zero 1<0 = rec (¬-<-zero 1<0)
+sucSucPredPred (suc zero) 1<n = rec (¬m<m 1<n)
 sucSucPredPred (suc (suc n)) 1<n = refl
 
 predSucn≡SucnPred : (n m : ℕ) → ¬ (n ≡ 0) → predℕ (sucn n m) ≡ sucn (predℕ n) m
-predSucn≡SucnPred zero m n≠0 = ⊥-elim (n≠0 refl)
+predSucn≡SucnPred zero m n≠0 = rec (n≠0 refl)
 predSucn≡SucnPred (suc n) m n≠0 = refl
 
 doubleDoubles : (n m : ℕ) → doubleℕ (doublesℕ n m) ≡ doublesℕ (suc n) m
@@ -44,7 +44,7 @@ doubleDoubles zero m = refl
 doubleDoubles (suc n) m = doubleDoubles n (doubleℕ m)
 
 doublePos : (n : ℕ) → ¬ (n ≡ 0) → ¬ (doubleℕ n ≡ 0)
-doublePos zero 0≠0 = ⊥-elim (0≠0 refl)
+doublePos zero 0≠0 = rec (0≠0 refl)
 doublePos (suc n) sn≠0 = snotz
 
 doublesPos : (n m : ℕ) → ¬ (m ≡ 0) → ¬ (doublesℕ n m ≡ 0)
@@ -52,7 +52,7 @@ doublesPos zero m m≠0 = m≠0
 doublesPos (suc n) m m≠0 = doublesPos n (doubleℕ m) (doublePos m (m≠0))
 
 predDoublePos : (n : ℕ) → ¬ (n ≡ 0) → ¬ (predℕ (doubleℕ n)) ≡ 0
-predDoublePos zero n≠0 = ⊥-elim (n≠0 refl)
+predDoublePos zero n≠0 = rec (n≠0 refl)
 predDoublePos (suc n) sn≠0 = snotz
 
 doubleDoublesOne≠0 : (n : ℕ) → ¬ (doubleℕ (doublesℕ n (suc zero)) ≡ 0)
@@ -123,7 +123,7 @@ is-zero? (suc n) = no snotz
 -- nonzero-is-suc : (n : ℕ) → ¬ (n ≡ 0) → ∃[ m ] (n ≡ suc m)
 -- nonzero-is-suc n n≠0 = ?
 nonzero-is-suc : (n : ℕ) → ¬ (n ≡ 0) → Σ[ m ∈ ℕ ] (n ≡ suc m)
-nonzero-is-suc zero n≠0 = ⊥-elim (n≠0 refl)
+nonzero-is-suc zero n≠0 = rec (n≠0 refl)
 nonzero-is-suc (suc n) n≠0 = (n , refl)
 
 1<sucsuc : (n : ℕ) → 1 < suc (suc n)
@@ -144,7 +144,7 @@ sucn≡+n m (suc n) =
   m + suc n ∎
 
 1<sucnDouble : (n m : ℕ) → ¬ (n ≡ 0) → 1 < sucn (doubleℕ n) m
-1<sucnDouble zero m 0≠0 = ⊥-elim (0≠0 refl)
+1<sucnDouble zero m 0≠0 = rec (0≠0 refl)
 1<sucnDouble (suc n) m _ = sucn (doubleℕ n) m , H n m
   where
     H : (n m : ℕ) → sucn (doubleℕ n) m + 2 ≡ sucn (suc (suc (doubleℕ n))) m

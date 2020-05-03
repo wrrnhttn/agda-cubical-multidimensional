@@ -114,7 +114,7 @@ maxn+1≡↑maxn n = refl
 maxr≡pred2ʳ : (r : ℕ) (d : DirNum r) →
            d ≡ max-n r → DirNum→ℕ d ≡ predℕ (doublesℕ r (suc zero))
 maxr≡pred2ʳ zero d d≡max = refl
-maxr≡pred2ʳ (suc r) (↓ , ds) d≡max = ⊥-elim ((¬↓,d≡↑,d′ ds (max-n r)) d≡max) 
+maxr≡pred2ʳ (suc r) (↓ , ds) d≡max = rec ((¬↓,d≡↑,d′ ds (max-n r)) d≡max) 
 maxr≡pred2ʳ (suc r) (↑ , ds) d≡max = 
      suc (doubleℕ (DirNum→ℕ ds))
    ≡⟨ cong (λ x → suc (doubleℕ x)) (maxr≡pred2ʳ r ds ds≡max) ⟩
@@ -136,7 +136,7 @@ maxr≡pred2ʳ (suc r) (↑ , ds) d≡max =
 -- TODO: rename?
 nextsuc-lemma : (r : ℕ) (x : DirNum r) →
          ¬ ((sucDoubleDirNum+ r x) ≡ max-n (suc r)) → ¬ (x ≡ max-n r)
-nextsuc-lemma zero tt ¬H = ⊥-elim (¬H refl)
+nextsuc-lemma zero tt ¬H = rec (¬H refl)
 nextsuc-lemma (suc r) (↓ , x) ¬H = ¬↓,d≡↑,d′ x (max-n r)
 nextsuc-lemma (suc r) (↑ , x) ¬H =
   λ h → ¬H (H (dropLeast≡ x (max-n r) ↑ h)) --⊥-elim (¬H H)
@@ -154,7 +154,7 @@ nextsuc-lemma (suc r) (↑ , x) ¬H =
 
 next≡suc : (r : ℕ) (x : DirNum r) →
             ¬ (x ≡ max-n r) → DirNum→ℕ (next x) ≡ suc (DirNum→ℕ x)
-next≡suc zero tt ¬x≡maxnr = ⊥-elim (¬x≡maxnr refl)
+next≡suc zero tt ¬x≡maxnr = rec (¬x≡maxnr refl)
 next≡suc (suc r) (↓ , x) ¬x≡maxnr = refl
 next≡suc (suc r) (↑ , x) ¬x≡maxnr = 
     doubleℕ (DirNum→ℕ (next x))
