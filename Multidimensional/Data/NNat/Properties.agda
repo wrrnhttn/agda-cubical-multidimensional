@@ -22,6 +22,16 @@ open import Multidimensional.Data.Dir
 open import Multidimensional.Data.DirNum
 open import Multidimensional.Data.NNat.Base
 
+NInd : {r : ℕ} → {P : N r → Type₀} →
+        P (zeroN r) → ((n : N r) → P n → P (sucN n)) → (n : N r) → P n
+NInd {r} {P} h0 hs ns = {!f ns!}
+  where
+  f : (ns : N r) → P ns
+  f (bn x) with zero-n? x
+  ... | yes x≡0 = {!h0!}
+  ... | no x≠0 = {!!} 
+  f (xr x ns) = {!!}
+
 
 sucN0lemma : (n : N zero) → xr tt n ≡ sucN n
 sucN0lemma (bn x) = refl

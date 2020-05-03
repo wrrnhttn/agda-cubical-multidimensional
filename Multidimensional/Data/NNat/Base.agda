@@ -19,6 +19,9 @@ data N (r : ℕ) : Type₀ where
   bn : DirNum r → N r
   xr : DirNum r → N r → N r
 
+zeroN : (r : ℕ) → N r
+zeroN r = bn (zero-n r)
+
 -- should define induction principle for N r
   
 -- we have 2ⁿ "unary" constructors, analogous to BNat with 2¹ (b0 and b1)
